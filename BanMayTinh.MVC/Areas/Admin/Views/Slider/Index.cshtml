@@ -1,0 +1,265 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Danh sách Sliders Show";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Danh sách Sliders Show</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="/Admin/Slider/Create" class="btn btn-primary btn-add btn-sm">Thêm mới <i class="flaticon-381-add-1" style="margin: 1px;"></i></a>
+            <a href="/Admin/Slider/Trash" class="btn btn-danger btn-trash btn-sm">
+                <i class="fa fa-trash" style="margin: 1px;"></i>
+                <span id="trash">Thùng rác</span>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblSlider" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th><strong>TÊN</strong></th>
+                        <th><strong>ẢNH</strong></th>
+                        <th><strong>VỊ TRÍ</strong></th>
+                        <th><strong>MÔ TẢ</strong></th>
+                        <th><strong>HÀNH ĐỘNG</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalSliders"></span> slide shows
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetAllSliders(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetAllSliders(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetAllSliders(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetAllSliders(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetAllSliders(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(sliders, totalSliders) {
+            $("#tblSlider tbody").remove();
+            if ($("#tblSlider tbody").length == 0) {
+                $("#tblSlider").append("<tbody></tbody>");
+            }
+
+            if (totalSliders != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + sliders.length}`);
+            $("#totalSliders").text(totalSliders);
+
+            let stt = 1;
+            for (let slider of sliders) {
+                let checkActive = '';
+                if (slider.isActive == 1) {
+                    checkActive += '<input class="changeStatus" data-id="' + slider.id + '" type="checkbox" onClick="status(\'' + slider.id + '\');" checked>';
+                }
+                else {
+                    checkActive += '<input class="changeStatus" data-id="' + slider.id + '" type="checkbox" onClick="status(\'' + slider.id + '\');" >';
+                }
+
+
+                let description = (slider.description == null ? "" : slider.description);
+
+                $("#tblSlider tbody").append(
+                    `<tr style="height: 80px">
+                        <td><strong>${stt}</strong></td>
+                        <td>${slider.id}</td>
+                        <td><a href="/Admin/Slider/Detail/${slider.id}">${slider.name}</a></td>
+                        <td><img src="/Pictures/Sliders/${slider.image}" alt="${slider.slug}" style="width: 180px; height: 100px;"></td>
+                        <td><span class="badge light badge-primary">${slider.position}</span></td>
+                        <td>${description}</td>
+                        <td>
+                            <div class="d-flex">
+                                <label class="switch">
+                                    ${checkActive}
+                                    <span class="slider round"></span>
+                                </label>
+                                <a href="/Admin/Slider/Edit/${slider.id}" class="btn btn-primary shadow btn-xs sharp mr-1"><i class="fa fa-pencil"></i></a>
+                                <button class="btn btn-danger shadow btn-xs sharp" onClick="delTrash('${slider.id}');">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        };
+
+        function GetAllSliders(number) {
+            let Url = "https://localhost:7008/api/Sliders/AllPage?page=" + number + "&take=" + take + "&isDelete=0";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#trash").text('Thùng rác (' + response.countTrash + ')');
+                    printTable(response.list, response.countSliders);
+                    $("#totalPage").text(`${Math.ceil(response.countSliders / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        };
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/Sliders/GetByNamePage?name=" + str + "&page=" + page + "&take=" + take + "&isDelete=0";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countSliders);
+                    $("#totalPage").text(`${Math.ceil(response.countSliders / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function status(id) {
+            let URL = "https://localhost:7008/api/Sliders/ChangeActive/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Thay đổi trạng thái thành công Slider ID = " + id + "!");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function delTrash(id) {
+            let URL = "https://localhost:7008/api/Sliders/DelTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Chuyển thành công Slider ID = " + id + " vào thùng rác!");
+                    GetAllSliders(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}
+

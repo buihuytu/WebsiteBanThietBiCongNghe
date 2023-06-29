@@ -1,0 +1,263 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Danh sách bài viết";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Danh sách bài viết</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="/Admin/News/Create" class="btn btn-primary btn-add btn-sm">Thêm <i class="flaticon-381-add-1" style="margin: 1px;"></i></a>
+            <a href="/Admin/News/Trash" class="btn btn-danger btn-trash btn-sm">
+                <i class="fa fa-trash" style="margin: 1px;"></i>
+                <span id="trash">Thùng rác</span>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblNews" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th><strong>Tên</strong></th>
+                        <th><strong>Ảnh đại diện</strong></th>
+                        <th><strong>Thể loại</strong></th>
+                        <th><strong>Mô tả</strong></th>
+                        <th><strong>Hành động</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalNews"></span> bài viết
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetAllNews(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetAllNews(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetAllNews(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetAllNews(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetAllNews(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(listNews, totalNews) {
+            $("#tblNews tbody").remove();
+            if ($("#tblNews tbody").length == 0) {
+                $("#tblNews").append("<tbody></tbody>");
+            }
+
+            if (totalNews != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + listNews.length}`);
+            $("#totalNews").text(totalNews);
+
+            let stt = 1;
+            for (let news of listNews) {
+                let checkActive = '';
+                if (news.isActive == 1) {
+                    checkActive += '<input class="changeStatus" data-id="' + news.newsId + '" type="checkbox" onClick="status(\'' + news.newsId + '\');" checked>';
+                }
+                else {
+                    checkActive += '<input class="changeStatus" data-id="' + news.newsId + '" type="checkbox" onClick="status(\'' + news.newsId + '\');" >';
+                }
+
+                let description = (news.newsDescription == null ? "" : news.newsDescription)
+
+                $("#tblNews tbody").append(
+                    `<tr style="height: 80px">
+                        <td><strong>${stt}</strong></td>
+                        <td>${news.newsId}</td>
+                        <td><a href="/Admin/News/Detail/${news.newsId}">${news.newsName}</a></td>
+                        <td><img src="/Pictures/News/${news.newsImage}" alt="news-${news.slug}" style="width: 150px; height: 80px;"></td>
+                        <td><span class="badge light badge-primary">${news.newsCategoryName}</span></td>
+                        <td>${description}</td>
+                        <td>
+                            <div class="d-flex">
+                                <label class="switch">
+                                    ${checkActive}
+                                    <span class="slider round"></span>
+                                </label>
+                                <a href="/Admin/News/Edit/${news.newsId}" class="btn btn-primary shadow btn-xs sharp mr-1"><i class="fa fa-pencil"></i></a>
+                                <button class="btn btn-danger shadow btn-xs sharp" onClick="delTrash('${news.newsId}');">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetAllNews(number) {
+            let Url = "https://localhost:7008/api/News/AllPage?page=" + number + "&take=" + take + "&isDelete=0";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#trash").text('Thùng rác (' + response.countTrash + ')');
+                    printTable(response.list, response.countNews);
+                    $("#totalPage").text(`${Math.ceil(response.countNews / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/News/GetByNamePage?name=" + str + "&page=" + page + "&take=" + take + "&isDelete=0";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countNews);
+                    $("#totalPage").text(`${Math.ceil(response.countNews / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function status(id) {
+            let URL = "https://localhost:7008/api/News/ChangeActive/" + id + " ? updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Thay đổi trạng thái thành công Bài viết ID = " + id + "!");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function delTrash(id) {
+            let URL = "https://localhost:7008/api/News/DelTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Chuyển thành công Bài viết ID = " + id + " vào thùng rác!");
+                    GetAllNews(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

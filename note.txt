@@ -1,0 +1,24 @@
+e001: exception chung
+e002: da ton tai 
+e003: ko ton tai
+e004: ko co anh tai len
+
+@section Scripts{
+    <script type="text/javascript">
+
+    </script>
+}
+
+CRUD: category, role, newscategory, account, slider, brand, news, contact, product
+
+Chua check: productimage, 
+
+Index: category, role, newscategory, account, slider, brand, news, contact, product
+Trash: category, role, newscategory, account, slider, brand, news, contact, product
+Create: category, role, newscategory, account, slider, brand, 
+Edit: category, role, newscategory, account, slider, brand, 
+Detail:category, role, newscategory, account, slider, brand, news, product
+Delete:category, role, newscategory, account, slider, brand, news, contact, product
+
+search: index, trash
+paging: index, trash

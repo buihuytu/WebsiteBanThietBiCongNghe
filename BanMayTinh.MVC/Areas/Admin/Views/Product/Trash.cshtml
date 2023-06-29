@@ -1,0 +1,238 @@
+﻿using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Thùng rác";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Thùng rác</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="/Admin/Product/Index" class="btn btn-primary btn-back btn-sm">Quay lại <i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblTrashProducts" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:60px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th style="width:200px;"><strong>Tên</strong></th>
+                        <th><strong>Ảnh đại diện</strong></th>
+                        <th><strong>Nhãn hiệu</strong></th>
+                        <th><strong>Thể loại</strong></th>
+                        <th><strong>Giá hiện tại</strong></th>
+                        <th><strong>Hành động</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalProduct"></span> sản phẩm
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetTrashProducts(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetTrashProducts(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetTrashProducts(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetTrashProducts(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetTrashProducts(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(products, totalProduct) {
+            $("#tblTrashProducts tbody").remove();
+            if ($("#tblTrashProducts tbody").length == 0) {
+                $("#tblTrashProducts").append("<tbody></tbody>");
+            }
+
+            if (totalProduct != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + products.length}`);
+            $("#totalProduct").text(totalProduct);
+
+            let stt = 1;
+            for (let product of products) {
+
+                let priceNow = (product.isDiscount == "1" ? product.proPrice : product.price)
+                let money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceNow)
+                
+                $("#tblTrashProducts tbody").append(
+                    `<tr style="height: 80px">
+                        <td><strong>${stt}</strong></td>
+                        <td>${product.productId}</td>
+                        <td>${product.productName}</td>
+                        <td><img src="/Pictures/products/${product.productImage}" alt="product-${product.slug}" style="width: 120px; height: 70px;"></td>
+                        <td><span class="badge light badge-secondary">${product.brandName}</span></td>
+                        <td><span class="badge light badge-info">${product.categoryName}</span></td>
+                        <td><span class="badge light badge-light">${money}</span></td>
+                        <td>
+                            <div class="d-flex">
+                                <button class="btn btn-primary shadow btn-xs sharp mr-1" onClick="reTrash('${product.productId}');">
+                                    <i class="flaticon-066-refresh"></i>
+                                </button>
+                                <a href="/Admin/Product/Delete/${product.productId}" class="btn btn-danger shadow btn-xs sharp">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetTrashProducts(number) {
+            let Url = "https://localhost:7008/api/Products/AllPage?page=" + number + "&take=" + take + "&isDelete=1";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countProducts);
+                    $("#totalPage").text(`${Math.ceil(response.countProducts / take)}`);
+                    paging(page);
+
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/Products/GetByNamePage?name=" + str + "&page=" + page + "&take=" + take + "&isDelete=1";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countProducts);
+                    $("#totalPage").text(`${Math.ceil(response.countProducts / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function reTrash(id) {
+            let URL = "https://localhost:7008/api/Products/ReTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    GetTrashProducts(page);
+                    showToastWarningTopRight("Khôi phục thành công Sản phẩm ID = " + id + " !");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

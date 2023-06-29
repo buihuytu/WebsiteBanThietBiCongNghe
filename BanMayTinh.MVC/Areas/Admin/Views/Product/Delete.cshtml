@@ -1,0 +1,211 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Xóa sản phẩm";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Xóa sản phẩm</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <button type="button" class="btn btn-danger btn-sm" onClick="deleteProduct();" title="Xóa" data-placement="top">
+                Xóa <i class="fa fa-trash" style="margin: 3px;"></i>
+            </button>
+            <a href="/Admin/Product/Trash" class="btn btn-primary btn-back btn-sm">Quay lại<i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-responsive-md">
+                <tbody id="detail">
+                    <tr>
+                        <th><strong>Tên sản phẩm</strong></th>
+                        <td id="productName"></td>
+                        <td id="id" style="display: none">@ViewBag.Id</td>
+                    </tr>
+                    <tr>
+                        <th><strong>Slug</strong></th>
+                        <td id="slug"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ảnh đại diện</strong></th>
+                        <td id="productImage"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Giá nhập</strong></th>
+                        <td id="imPrice"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Giá bán</strong></th>
+                        <td id="price"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Giá khuyến mại</strong></th>
+                        <td id="proPrice"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Số lượng tồn</strong></th>
+                        <td id="quantity"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Trạng thái</strong></th>
+                        <td id="status"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Nhãn hiệu</strong></th>
+                        <td id="brandName"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Thể loại</strong></th>
+                        <td id="categoryName"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Mô tả</strong></th>
+                        <td id="description"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Chi tiết sản phẩm</strong></th>
+                        <td id="productDetail"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Thông số kĩ thuật</strong></th>
+                        <td id="specification"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Đặc trưng</strong></th>
+                        <td id="feature"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ưu đãi mới</strong></th>
+                        <td id="newPromotion"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Quà tặng</strong></th>
+                        <td id="gift"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Bảo hành</strong></th>
+                        <td id="guarantee"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Tiêu đề SEO</strong></th>
+                        <td id="metaTitle"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Mô tả SEO</strong></th>
+                        <td id="metaDesc"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Từ khóa SEO</strong></th>
+                        <td id="metaKey"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày tạo</strong></th>
+                        <td id="createdDate"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người tạo</strong></th>
+                        <td id="createdBy"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày sửa</strong></th>
+                        <td id="updatedDate"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người sửa</strong></th>
+                        <td id="updatedBy"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        $(document).ready(function () {
+            let Url = 'https://localhost:7008/api/Products/id?id=' + $("#id").text();
+
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    let createdAt, updatedAt;
+                    if (response.createdDate != null) {
+                        dateCreated = new Date(response.createdDate.trim());
+                        createdAt = dateCreated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        createdAt = "";
+                    }
+                    if (response.updatedDate != null) {
+                        dateUpdated = new Date(response.updatedDate.trim());
+                        updatedAt = dateUpdated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        updatedAt = "";
+                    }
+
+                    let active = (response.isActive == 1 ? "Hiển thị" : "Không hiển thị");
+                    $('#status').append(`<span class="badge badge-pill badge-info" style="margin-right: 2px">${active}</span>`);
+                    if (response.isDiscount == 1) {
+                        $('#status').append(`<span class="badge badge-pill badge-warning" style="margin-right: 2px">Discount</span>`);
+                    }
+                    if (response.isHotProduct == 1) {
+                        $('#status').append(`<span class="badge badge-pill badge-danger" style="margin-right: 2px">Hot Product</span>`);
+                    }
+
+                    console.log(response);
+                    $('#productName').text(response.productName);
+                    $('#slug').text(response.slug);
+                    $('#description').append(response.description);
+                    $('#productDetail').append(response.detail);
+                    $('#productImage').append(`<img src="/Pictures/Products/${response.productImage}" alt="${response.slug}" style="width: 260px; height: 140px;">`);
+                    $('#brandName').text(response.brandName);
+                    $('#categoryName').text(response.categoryName);
+                    $('#specification').append(response.specification);
+                    $('#feature').append(response.feature);
+                    $('#newPromotion').append(response.newPromotion);
+                    $('#imPrice').text(response.imPrice);
+                    $('#price').text(response.price);
+                    $('#proPrice').text(response.proPrice);
+                    $('#quantity').text(response.quantity);
+                    $('#guarantee').append(response.guarantee);
+                    $('#gift').append(response.gift);
+                    $('#metaTitle').text(response.metaTitle);
+                    $('#metaDesc').text(response.metaDesc);
+                    $('#metaKey').text(response.metaKey);
+                    $('#createdDate').text(createdAt);
+                    $('#createdBy').text(response.updatedBy);
+                    $('#updatedDate').text(updatedAt);
+                    $('#updatedBy').text(response.updatedBy);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        });
+
+        function deleteProduct() {
+            let productId = $("#id").text().trim()
+            let Url = 'https://localhost:7008/api/Products/id?id=' + productId;
+            $.ajax({
+                url: Url,
+                method: 'DELETE',
+                contentType: 'text',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Xóa thành công Sản phẩm ID = " + productId + "!", "/Admin/Product/Trash");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

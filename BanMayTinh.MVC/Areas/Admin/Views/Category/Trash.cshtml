@@ -1,0 +1,238 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Thùng rác";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Thùng rác</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="/Admin/Category/Index" class="btn btn-primary btn-back btn-sm">Quay lại<i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblTrashCategory" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th><strong>Tên</strong></th>
+                        <th><strong>ICON</strong></th>
+                        <th><strong>Ghi chú</strong></th>
+                        <th><strong>Ngày sửa</strong></th>
+                        <th><strong>Hành động</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalCategory"></span> thể loại sản phẩm
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetTrashCategories(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetTrashCategories(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetTrashCategories(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetTrashCategories(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetTrashCategories(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(categories, totalCategory) {
+            $("#tblTrashCategory tbody").remove();
+            if ($("#tblTrashCategory tbody").length == 0) {
+                $("#tblTrashCategory").append("<tbody></tbody>");
+            }
+
+            if (totalCategory != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + categories.length}`);
+            $("#totalCategory").text(totalCategory);
+
+            let stt = 1;
+            for (let category of categories){
+                let updatedAt = '';
+                if (category.updatedDate != null) {
+                    let d = new Date(category.updatedDate.trim());
+                    updatedAt = d.toLocaleString("nl-BE");
+                }
+
+                let note = (category.notes == null ? "" : category.notes);
+
+                $("#tblTrashCategory tbody").append(
+                    `<tr>
+                        <td><strong>${stt}</strong></td>
+                        <td>${category.id}</td>
+                        <td>${category.name}</td>
+                        <td><img src="/Pictures/Categories/${category.icon}" alt="icon-${category.name}" style="width: 30px; height: 20px;"></td>
+                        <td>${note}</td>
+                        <td>${updatedAt}</td>
+                        <td>
+                            <div class="d-flex">
+                                <button class="btn btn-primary shadow btn-xs sharp mr-1" onClick="reTrash('${category.id}');" title="Restore" data-placement="top">
+                                    <i class="flaticon-066-refresh"></i>
+                                </button>
+                                <a href="/Admin/Category/Delete/${category.id}" class="btn btn-danger shadow btn-xs sharp">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetTrashCategories(number) {
+            let Url = "https://localhost:7008/api/Categories/AllPage?page=" + number + "&take=" + take + "&isDelete=1";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countCategory);
+                    $("#totalPage").text(`${Math.ceil(response.countCategory / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/Categories/GetByNamePage?name=" + str + "&page=" + page + "&take=" + take + "&isDelete=1";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countCategory);
+                    $("#totalPage").text(`${Math.ceil(response.countCategory / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function reTrash(id) {
+            let URL = "https://localhost:7008/api/Categories/ReTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Khôi phục thành công Thể loại ID = " + id + " !");
+                    GetTrashCategories(page);
+                },
+                error: function (error) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,154 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Xóa thể loại";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Xóa thể loại</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <button type="button" class="btn btn-danger btn-sm" onClick="deleteCate();" title="Delete" data-placement="top">
+                Xóa <i class="fa fa-trash" style="margin: 3px;"></i>
+            </button>
+            <a href="/Admin/Category/Trash" class="btn btn-primary btn-back btn-sm">
+                Quay lại thùng rác<i class="flaticon-381-exit-1" style="margin: 3px;"></i>
+            </a>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-responsive-md">
+                <tbody id="detail">
+                    <tr>
+                        <th><strong>Tên</strong></th>
+                        <td id="name"></td>
+                        <td id="id" style="display: none;">@ViewBag.Id</td>
+                    </tr>
+                    <tr>
+                        <th><strong>Slug</strong></th>
+                        <td id="slug"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Icon</strong></th>
+                        <td id="icon"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Trạng thái</strong></th>
+                        <td id="status"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ghi chú</strong></th>
+                        <td id="note"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Thể loại cha</strong></th>
+                        <td id="parent"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Tiêu đề SEO</strong></th>
+                        <td id="metaTitle"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Từ khóa SEO</strong></th>
+                        <td id="metaKey"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Mô tả SEO</strong></th>
+                        <td id="metaDesc"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày tạo</strong></th>
+                        <td id="createdAt"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người tạo</strong></th>
+                        <td id="createdBy"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày sửa</strong></th>
+                        <td id="updatedAt"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người sửa</strong></th>
+                        <td id="updatedBy"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        $(document).ready(function () {
+            let Url = 'https://localhost:7008/api/Categories/id?id=' + $("#id").text();
+
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    let createdAt, updatedAt;
+                    if (response.createdDate != null) {
+                        dateCreated = new Date(response.createdDate.trim());
+                        createdAt = dateCreated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        createdAt = "";
+                    }
+                    if (response.updatedDate != null) {
+                        dateUpdated = new Date(response.updatedDate.trim());
+                        updatedAt = dateUpdated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        updatedAt = "";
+                    }
+
+                    let activeStatus = (response.isActive == 1 ? "Hiển thị" : "Không hiển thị");
+                    $('#status').append(`<span class="badge badge-pill badge-info" style="margin-right: 2px">${activeStatus}</span>`);
+
+                    console.log(response);
+                    $('#name').text(response.name);
+                    $('#slug').text(response.slug);
+                    $('#icon').append(`<img src="/Pictures/Categories/${response.icon}" alt="icon-${response.slug}" style="width: 30px; height: 20px;">`);
+                    $('#note').text(response.notes);
+                    $('#parent').text(response.parentName);
+                    $('#metaTitle').text(response.metaTitle);
+                    $('#metaKey').text(response.metaKey);
+                    $('#metaDesc').text(response.metaDesc);
+                    $('#createdAt').text(createdAt);
+                    $('#createdBy').text(response.createdName);
+                    $('#updatedAt').text(updatedAt);
+                    $('#updatedBy').text(response.updatedName);
+
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        })
+
+        function deleteCate() {
+            let cateId = $("#id").text().trim()
+            let Url = 'https://localhost:7008/api/Categories/id?id=' + cateId;
+            $.ajax({
+                url: Url,
+                method: 'DELETE',
+                contentType: 'text',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Xóa thành công Thể loại ID = " + cateId + "!", "/Admin/Category/Trash");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

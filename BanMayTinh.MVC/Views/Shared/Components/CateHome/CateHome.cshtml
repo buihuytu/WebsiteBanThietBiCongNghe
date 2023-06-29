@@ -1,0 +1,17 @@
+﻿@model IList<BanMayTinh.DTO.TblCategory>
+
+<div id="hidden-product" class="overflow-hidden">
+    <div class="nav product-hidden">
+        
+        @foreach (var c in Model)
+        {
+            <div class="nav-item">
+                <a href=@Url.Action("ProductCategory", "Site", new {slug = @c.Slug}) class="nav-link title-item">
+                    <img src="/Pictures/Categories/@c.Icon" style="width: 25px; height: 20px">
+                    <p style="display: inline">@c.Name</p>
+                </a>
+            </div>
+        }
+
+    </div>
+</div>

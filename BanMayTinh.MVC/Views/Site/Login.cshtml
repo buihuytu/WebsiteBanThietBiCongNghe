@@ -1,0 +1,98 @@
+﻿
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- form -->
+<div class="container form-login pb-4">
+    <div class="home" style="text-align: start;margin-top: 90px; ">
+        <a href=@Url.Action("Home", "Site") style="text-decoration: none;font-weight: 500;color: #ff0000;">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 style="width: 15px;margin-top: -5px;"
+                 viewBox="0 0 576 512">
+                <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" fill="#ff0000" />
+            </svg>
+            <span class="mt-5">Trang chủ</span>
+        </a>
+    </div>
+    <img class="mx-auto" src="/Pictures/UI/smember.png" alt="smember" width="200">
+    <h4 style="opacity: 0.8;letter-spacing: -1px;">Đăng nhập tài khoản Smember</h4>
+    <form action="" class="shop">
+        <input class="mt-3 border-0 w-75 rounded-sm p-2" type="text" name="Name" placeholder=" Vui lòng nhập số điện thoại/email"><br>
+        <small id="nameHelp" class="pl-1 form-text text-danger"></small>
+        <input class="mt-4 border-0 w-75 rounded-sm p-2" type="text" name="Password" placeholder=" Vui lòng nhập mật khẩu"><br>
+        <small id="passHelp" class="pl-1 form-text text-danger"></small>
+        <button id="btn_login" class="mt-4 mb-4 btn border-0 w-75 rounded-pill py-2 text-white btn-danger" type="submit">
+            Đăng nhập
+        </button><br>
+        <a href="" class="text-misspass">Quên mật khẩu?</a>
+    </form>
+    <div class="mt-3">
+        <p class="d-inline-block my-auto" style="background-color: #a6a6a6;width: 35%; height: 2px;"></p>
+        <p class="d-inline-block my-auto">or</p>
+        <p class="d-inline-block my-auto" style="background-color: #a6a6a6;width: 35%; height: 2px;"></p>
+    </div>
+    <div class="mt-4 login-gg">
+        <button class="w-75 mx-auto btn btn-block btn-social btn-google bg-primary text-white" id="btnGoogle" type="button">
+            <svg style="margin-top: -4px;" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
+                <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z" />
+            </svg>
+            Login with Google
+        </button>
+    </div>
+    <div class="mt-3">
+        <span style="opacity: 0.8;">Bạn có tài khoản chưa?</span>
+        <a href=@Url.Action("Register", "Site") style="text-decoration: none; color: #df3346;font-weight: 500;">Đăng ký ngay</a>
+    </div>
+</div>
+
+
+
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('#btn_login').off('click').on('click', function (e) {
+                e.preventDefault();
+
+                const User = $('input[name=Name]').val().trim();
+                const Password = $('input[name=Password]').val().trim();
+
+                console.log(User, Password)
+                if (User == '') {
+                    $('#nameHelp').html('Vui lòng nhập Email hoặc Số điện thoại!');
+                    return false;
+                }
+                else if (Password == '') {
+                    $('#passHelp').html('Vui lòng nhập mật khẩu!');
+                    return false;
+                }
+
+                $.ajax("/Account/UserLogin", {
+                    type: 'POST',
+                    data: { User: User, Password: Password },
+                    dataType: 'json',
+                    success: function (s) {
+                        if (s.s == 1) {
+                            $('#nameHelp').text('Thông tin tài khoản không chính xác');
+                            return;
+                        } else if (s.s == 2) {
+                            $('#passHelp').text('Mật khẩu không chính xác');
+                            return;
+                        } else if (s.s == 0) {
+                            window.location.replace("https://localhost:7224/Home");
+                            return;
+                        }
+                    }
+                });
+            });
+        });
+
+        $(function () {
+            $('.shop input').click(function () {
+                $('#nameHelp').html('');
+                $('#passHelp').html('');
+            })
+        })
+    </script>
+}

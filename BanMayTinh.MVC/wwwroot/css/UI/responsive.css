@@ -1,0 +1,99 @@
+@media screen and (max-width: 768px) {
+    .img1{
+        display: none;
+    }
+    .img2{
+        display: block;
+    }
+    .list-product h2{
+        font-size: 26px;
+        margin-top: 5px;
+    }
+    .product-list span{
+        display: none;
+    }
+    .product-hidden{
+        margin-left: -80px;
+    }
+    .color-item{
+        margin-top: 20px;
+    }
+    .link-listphone{
+        margin-left: -80px;
+    }
+    .link-listphone svg{
+        margin-left: -50px;
+    }
+    .detail svg{
+        margin-left: -50px;
+    }
+}
+@media screen and (max-width: 576px) {
+   
+    .header{
+        justify-content: space-between;
+    }
+    .product-list{
+        display: block;
+    }
+    .cart{
+        margin-right: -10px;
+    }
+    .hotline{
+        display: none;
+    }
+    .text-cart{
+        display: none;
+    }  
+    .text-login{
+        display: none;
+    }
+    .icon-user{
+        margin-top: 18px;
+    } 
+    .list-products{
+        width: 100%;
+    }
+    .list-product h2{
+        font-size: 20px;
+        margin-top: 5px;
+    }    
+    .list-product a{
+        height: 37px;
+    } 
+    .product-hidden{
+        margin-left: 20px;
+    }
+    .btn-black{
+        margin-top: 10px;
+    }
+    .list-product-items-link img{
+        width: 120px;
+        height: 120px;
+    }
+    .list-product-items-link h5{
+        font-size: 12px;
+    }
+    .des{
+        font-size: 11px;
+    }
+    .btn-add{
+        font-size: 12px;
+    }
+    .order-item{
+        font-size: 12px;
+    }
+    .title-product h3{
+        font-size: 22px;
+    }
+    .link-listphone svg{
+        margin-left: -85px;
+    }
+    .detail svg{
+        margin-left: -90px;
+    }
+    .link-home{
+        margin-left: -25px;
+    }
+    
+}

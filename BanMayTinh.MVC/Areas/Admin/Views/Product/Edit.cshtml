@@ -1,0 +1,332 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Chỉnh sửa sản phẩm";
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="h5-title">Thêm mới sản phẩm</h5>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div class="button">
+            <button href="" class="btn btn-primary btn-sm" onclick="editProduct();">
+                <i class="flaticon-381-save"></i>
+                Lưu
+            </button>
+            <a href="/Admin/Product/Index" class="btn btn-danger btn-sm">
+                <i class="flaticon-381-exit-1"></i>
+                Thoát
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row w-100">
+            <div class="col-md-9">
+                <form>
+                    <div id="id" style="display:none;">@ViewBag.Id</div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tên sản phẩm</label>
+                        <div class="form-group">
+                            <input id="name" type="text" class="form-control input-default " placeholder="Tên sản phẩm">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Ưu đãi</label>
+                        <div class="form-group">
+                            <textarea class="form-control" name="newPromotion" id="newPromotion" rows="5" cols="20"></textarea>
+                            <i class="text-danger"><strong>* </strong>Vui lòng xuống dòng cho mỗi ưu đãi</i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Quà tặng</label>
+                        <div class="form-group">
+                            <textarea class="form-control" name="gift" id="gift" rows="5" cols="5"></textarea>
+                            <i class="text-danger"><strong>* </strong>Vui lòng xuống dòng cho mỗi quà tặng</i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="description" id="description" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Thông số kĩ thuật</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="specification" id="specification" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Chi tiết sản phẩm</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="detail" id="detail" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Đặc điểm nổi bật</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="feature" id="feature" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Thông tin bảo hành</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="guarantee" id="guarantee" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tiêu đề SEO</label>
+                        <div class="form-group">
+                            <input id="metaTitle" type="text" class="form-control input-default " placeholder="Tiêu đề SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Từ khóa SEO</label>
+                        <div class="form-group">
+                            <input id="metaKey" type="text" class="form-control input-default " placeholder="Từ khóa SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả SEO</label>
+                        <div class="form-group">
+                            <input id="metaDesc" type="text" class="form-control input-default " placeholder="Mô tả SEO">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label class="mb-2 font-weight-bold" for="">Ảnh đại diện</label>
+                    <div class="">
+                        <input id="image" class="control-label" name="" type="file" value="" accept="image/*">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="img">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Thể loại </label>
+                    <div id="cate" class="form-group">
+                        <select id="idCategory" class="form-control default-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Nhãn hiệu </label>
+                    <div id="brand" class="form-group">
+                        <select id="idBrand" class="form-control default-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Giá nhập</label>
+                    <div class="form-group">
+                        <input id="imPrice" type="number" class="form-control input-default " placeholder="Giá nhập">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Giá bán</label>
+                    <div class="form-group">
+                        <input id="price" type="number" class="form-control input-default " placeholder="Giá bán">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Giá khuyến mại</label>
+                    <div id="brand" class="form-group">
+                        <input id="proPrice" type="number" class="form-control input-default " placeholder="Giá khuyến mại">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Số lượng</label>
+                    <div id="brand" class="form-group">
+                        <input id="quantity" type="number" class="form-control input-default " placeholder="Số lượng">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Trạng thái hiển thị</label>
+                    <div class="form-group">
+                        <select id="active" class="form-control default-select">
+                            <option value="1">Hiển thị</option>
+                            <option value="0">Không hiển thị</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="row">
+                        <label class="font-weight-bold col-sm-8 pt-0">Giảm giá</label>
+                        <div class="col-sm-4">
+                            <div class="custom-control custom-checkbox mb-3 check-xs">
+                                <input class="form-check-input" type="checkbox" name="discount" id="discount" value="" aria-label="...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="row">
+                        <label class="font-weight-bold col-sm-8 pt-0">Sản phẩm nổi bật</label>
+                        <div class="col-sm-4">
+                            <div class="custom-control custom-checkbox mb-3 check-xs">
+                                <input class="form-check-input" type="checkbox" name="hotProduct" id="hotProduct" value="" aria-label="...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        LoadAllCategories();
+        LoadAllBrands();
+        $(document).ready(function () {
+            LoadProductInfo();
+        });
+
+        function LoadAllCategories() {
+            let Url = "https://localhost:7008/api/Categories";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#cate .show li").each(function () {
+                        $(this).remove();
+                    });
+                    $("#idCategory").append(`<option disabled selected hidden>Vui lòng chọn thể loại</option>`);
+                    for (let category of response) {
+                        $("#idCategory").append(`<option value="${category.id}">${category.name}</option>`);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function LoadAllBrands() {
+            let Url = "https://localhost:7008/api/Brands";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#brand .show li").each(function () {
+                        $(this).remove();
+                    });
+                    $("#idBrand").append(`<option disabled selected hidden>Vui lòng chọn nhãn hiệu</option>`);
+                    for (let brand of response) {
+                        $("#idBrand").append(`<option value="${brand.brandId}">${brand.brandName}</option>`);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function LoadProductInfo() {
+            let Url = 'https://localhost:7008/api/Products/id?id=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+
+                    $('#name').val(response.productName);
+                    $('#description').summernote('code', response.description);
+                    $('#detail').summernote('code', response.detail);
+                    $('.img').append(`<img src="/Pictures/Products/${response.productImage}" alt="" width="100%" class="d-block my-2">`);
+                    $('#idBrand').val(response.brandId).change();
+                    $('#idCategory').val(response.categoryId).change();
+                    $('#specification').summernote('code', response.specification);
+                    $('#feature').summernote('code', response.feature);
+                    $('#newPromotion').val(response.newPromotion);
+                    $('#imPrice').val(response.imPrice);
+                    $('#price').val(response.price);
+                    $('#proPrice').val(response.proPrice);
+                    $('#quantity').val(response.quantity);
+                    $('#guarantee').summernote('code', response.guarantee);
+                    $('#gift').val(response.gift);
+                    $('#metaTitle').val(response.metaTitle);
+                    $('#metaKey').val(response.metaKey);
+                    $('#metaDesc').val(response.metaDesc);
+                    $('#active').val(response.isActive).change();
+                    if (response.isDiscount == 1){
+                        $('#discount').prop('checked', true);
+                    }
+                    if (response.isHotProduct == 1) {
+                        $('#hotProduct').prop('checked', true);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function editProduct() {
+            var fd = new FormData();
+            var file = $('#image').prop('files')[0];
+            fd.append("Name", $('#name').val());
+            fd.append("Description", $('#description').summernote('code'));
+            fd.append("IdBrand", $('#idBrand').val() == null ? 0 : $('#idBrand').val());
+            fd.append("IdCategory", $('#idCategory').val() == null ? 0 : $('#idCategory').val());
+            fd.append("Specification", $('#specification').summernote('code'));
+            fd.append("Feature", $('#feature').summernote('code'));
+            fd.append("NewPromotion", $('#newPromotion').val());
+            fd.append("ImPrice", $('#imPrice').val());
+            fd.append("Price", $('#price').val());
+            fd.append("ProPrice", $('#proPrice').val());
+            fd.append("Quantity", $('#quantity').val());
+            fd.append("Guarantee", $('#guarantee').summernote('code'));
+            fd.append("Detail", $('#detail').summernote('code'));
+            fd.append("Gift", $('#gift').val());
+            fd.append("MetaTitle", $('#metaTitle').val());
+            fd.append("MetaKey", $('#metaKey').val());
+            fd.append("MetaDesc", $('#metaDesc').val());
+            fd.append("IsActive", $('#active').val());
+            //fd.append("UpdatedBy", 4);
+            fd.append("UpdatedBy", $("#session").text());
+            fd.append("FileImage", file);
+            if ($('#hotProduct').is(':checked')) {
+                fd.append("IsHotProduct", 1);
+            }
+            else {
+                fd.append("IsHotProduct", 0);
+            }
+            if ($('#discount').is(':checked')) {
+                fd.append("IsDiscount", 1);
+            }
+            else {
+                fd.append("IsDiscount", 0);
+            }
+            let Url = "https://localhost:7008/api/Products/id?id=" + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Cập nhật thành công thông tin Sản phẩm " + $("#name").val() + "!", "/Admin/Product/Index");
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Sản phẩm: " + $("#name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+    </script>
+}

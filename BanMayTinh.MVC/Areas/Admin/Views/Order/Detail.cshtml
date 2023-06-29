@@ -1,0 +1,199 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Chi tiết đơn hàng</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div id="id" style="display:none;">@ViewBag.Id</div>
+        <div>
+            <a href="~/Admin/Order" class="btn btn-danger btn-sm text-white"> <i class="flaticon-381-list"></i>&nbsp; Danh sách đặt hàng</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <table class="table border">
+                    <thead>
+                        <tr>
+                            <th>Địa chỉ nhận hàng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Họ tên KH: <b><span id="name"></span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Số điện thoại: <b><span id="phone"></span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Địa chỉ: <b><span id="address"></span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Email: <b><span id="email"></span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Ghi chú: <b><span id="notes"></span></b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-6">
+                <table class="table border">
+                    <thead>
+                        <tr>
+                            <th>Đơn hàng - Code: <span id="code"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Trạng thái: <b><span id="status"> </span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Nhân viên tiếp nhận: <b><span id="employee"></span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Ngày tạo: <b><span id="createdDate"> </span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Ngày cập nhật: <b><span id="updatedDate"> </span></b></td>
+                        </tr>
+                        <tr>
+                            <td>Ngày gửi: <b><span id="exportedDate"> </span></b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <table id="tblDetail" class="table border">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th>Tổng</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        $(document).ready(function () {
+            GetOrder(); 
+            GetOrderDetail();
+        });
+
+        function GetOrder() {
+            let Url = 'https://localhost:7008/api/Orders/id?id=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    $('#name').text(response.receiverName);
+                    $('#phone').text(response.receiverPhone);
+                    $('#address').text(response.receiverAddress);
+                    $('#email').text(response.receiverEmail);
+                    $('#notes').text(response.notes);
+                    $('#code').text(response.code);
+                    if (response.status == 1) {
+                        status += `<small class="badge badge-wanring"> Chờ xử lý</small>`;
+                    }
+                    else if (response.status == 2) {
+                        status += `<small class="badge badge-secondary">Đang xử lý</small>`;
+                    }
+                    else if (response.status == 3) {
+                        status += `<small class="badge badge-info">Đang giao</small>`;
+                    }
+                    else if (response.status == 4) {
+                        status += `<small class="badge badge-success">Hoàn thành</small>`;
+                    }
+                    else if (response.status == 5) {
+                        status += `<small class="badge badge-danger">Đã hủy</small>`;
+                    }
+                    $('#status').append(status);
+                    $('#employee').text(response.updatedName);
+                    $('#createdDate').text((new Date(response.createdDate.trim())).toLocaleString("nl-BE"));
+                    $('#updatedDate').text(response.updatedDate == null ? "" : (new Date(response.updatedDate.trim())).toLocaleString("nl-BE"));
+                    $('#exportedDate').text(response.exportedDate == null ? "" : (new Date(response.exportedDate.trim())).toLocaleString("nl-BE"));
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        };
+
+        function GetOrderDetail(){
+            let Url = 'https://localhost:7008/api/OrderDetails/orderId?orderId=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function printTable(details) {
+            $("#tblDetail tbody").remove();
+            if ($("#tblDetail tbody").length == 0) {
+                $("#tblDetail").append("<tbody></tbody>");
+            }
+            let totalMoney = 0;
+            for (let detail of details) {
+                let price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.price);
+                let total = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.total);
+                totalMoney += detail.total
+                $("#tblDetail tbody").append(
+                    `<tr>
+                        <td>
+                            <img src="/Pictures/Products/${detail.productImage}" alt="${detail.productName}" width="70">
+                            ${detail.productName}
+                        </td>
+                        <td>${price}</td>
+                        <td class="text-center">x${detail.quantity}</td>
+                        <td>${total} </td>
+                    </tr>`
+                );
+            }
+            let sum = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalMoney);
+            $("#tblDetail tbody").append(
+                `<tr class="border-top">
+                    <td class="text-right" colspan="3"> Thành tiền</td>
+                    <td id="subtotal">${sum} </td>
+                </tr>
+                <tr>
+                    <td class="text-right" colspan="3"> Phí vận chuyển</td>
+                    <td id="deliveryPrice">0₫ </td>
+                </tr>
+                <tr>
+                    <td class="text-right" colspan="3"> Tổng cộng </td>
+                    <td id="total" style="font-weight: 600;color: #602626;">${sum} </td>
+                </tr>`
+            )
+        }
+        
+    </script>
+}

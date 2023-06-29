@@ -1,0 +1,52 @@
+﻿@model IList<BanMayTinh.DTO.TblSlider>
+@{
+    var stt = 1;
+}
+
+<div class="slider">
+    <div class="carousel">
+        <div class="carousel_inner">
+            @foreach (var s in Model)
+            {
+                if(stt == 1)
+                {
+                    <div class="carousel_item carousel_item__active">
+                        <img style="border-radius: 5px; width: 925px; height: 400px;" src="/Pictures/Sliders/@s.Image" alt="tivi" class="carousel_img">
+                    </div>
+                }
+                else
+                {
+                    <div class="carousel_item">
+                        <img style="border-radius: 5px; width: 925px; height: 400px;" src="/Pictures/Sliders/@s.Image" alt="samsung" class="carousel_img">
+                    </div>
+                }
+                stt++;
+            }
+        </div>
+
+        <div class="carousel_indicator">
+            @for (var i = 1; i < stt; i++)
+            {
+                if(@i == 1)
+                {
+                    <button class="carousel_dot carousel_dot__active"></button>
+                }
+                else
+                {
+                    <button class="carousel_dot"></button>
+                }
+            }
+            
+        </div>
+
+        <div class="carousel_control">
+            <button class="carousel_button carousel_button__prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel_button carousel_button__next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    
+</div>

@@ -1,0 +1,190 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Chỉnh sửa bài viết";
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="h5-title">Thêm mới bài viết</h5>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div class="button">
+            <button href="" class="btn btn-primary btn-sm" onclick="editNews();">
+                <i class="flaticon-381-save"></i>
+                Lưu
+            </button>
+            <a href="/Admin/News/Index" class="btn btn-danger btn-sm">
+                <i class="flaticon-381-exit-1"></i>
+                Thoát
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row w-100">
+            <div class="col-md-9">
+                <form>
+                    <div id="id" style="display:none;">@ViewBag.Id</div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tên bài viết</label>
+                        <div class="form-group">
+                            <input id="name" type="text" class="form-control input-default " placeholder="Tên bài viết">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả</label>
+                        <div class="form-group">
+                            <textarea id="description" type="text" rows="10" cols="80" class="form-control input-default " placeholder="Mô tả"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tiêu đề SEO</label>
+                        <div class="form-group">
+                            <input id="metaTitle" type="text" class="form-control input-default " placeholder="Tiêu đề SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Từ khóa SEO</label>
+                        <div class="form-group">
+                            <input id="metaKey" type="text" class="form-control input-default " placeholder="Từ khóa SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả SEO</label>
+                        <div class="form-group">
+                            <input id="metaDesc" type="text" class="form-control input-default " placeholder="Mô tả SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Nội dung</label>
+                        <div class="form-group">
+                            <textarea class="form-control textarea" name="contents" id="contents" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Thể loại </label>
+                    <div id="cate" class="form-group">
+                        <select id="idNewsCategory" class="form-control default-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="mb-2 font-weight-bold" for="">Ảnh đại diện</label>
+                    <div class="">
+                        <input id="image" class="control-label" name="" type="file" value="">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="img">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Trạng thái hiển thị</label>
+                    <div class="form-group">
+                        <select id="active" class="form-control default-select">
+                            <option value="1">Hiển thị</option>
+                            <option value="0">Không hiển thị</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('div.note-editable').css({ 'max-height': 800 + 'px' });
+            let Url = "https://localhost:7008/api/NewsCategories";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#cate .show li").each(function () {
+                        $(this).remove();
+                    });
+                    $("#idNewsCategory").append(`<option disabled selected hidden>Vui lòng chọn thể loại</option>`);
+                    for (let category of response) {
+                        $("#idNewsCategory").append(`<option value="${category.id}">${category.name}</option>`);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+            
+            loadNewsDetail();
+        });
+
+        function loadNewsDetail() {
+            let Url = 'https://localhost:7008/api/News/id?id=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+
+                    $('#name').val(response.newsName);
+                    $('#description').val(response.newsDescription);
+                    $('#contents').summernote('code', response.contents)
+                    $('#metaTitle').val(response.metaTitle);
+                    $('#metaKey').val(response.metaKey);
+                    $('#metaDesc').val(response.metaDesc);
+                    $('#idCategory').val(response.idCategory).change();
+                    $('.img').append(`<img src="/Pictures/News/${response.newsImage}" alt="" width="100%" class="d-block my-2">`);
+                    $('#idNewsCategory').val(response.newsCategoryId).change();
+                    $('#active').val(response.isActive).change();
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function editNews() {
+            var fd = new FormData();
+            var file = $('#image').prop('files')[0];
+            fd.append("Name", $('#name').val());
+            fd.append("Description", $('#description').val());
+            fd.append("IdNewCategory", $('#idNewsCategory').val());
+            fd.append("MetaTitle", $('#metaTitle').val());
+            fd.append("MetaKey", $('#metaKey').val());
+            fd.append("MetaDesc", $('#metaDesc').val());
+            fd.append("Contents", CKEDITOR.instances['contents'].getData());
+            fd.append("IsActive", $('#active').val());
+            //fd.append("UpdatedBy", 4);
+            fd.append("UpdatedBy", $("#session").text());
+            fd.append("FileImage", file);
+            let Url = "https://localhost:7008/api/News/id?id=" + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if ($('#idNewsCategory').val() == null) {
+                        alert("Vui lòng chọn thể loại!");
+                    }
+                    console.log(response);
+                    showToastSuccessTopRight("Cập nhật thành công thông tin Bài viết: " + $("#name").val() + "!", "/Admin/News/Index");
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Bài viết: " + $("#name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+    </script>
+}

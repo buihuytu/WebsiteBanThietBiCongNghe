@@ -1,0 +1,135 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Sửa Slider Show";   
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="h5-title">Thêm mới Slider Show</h5>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div class="button">
+            
+            <button href="" class="btn btn-primary btn-sm" onclick="editSlider();">
+                <i class="flaticon-381-save"></i>
+                Sửa
+            </button>
+            <a href="/Admin/Slider/Index" class="btn btn-danger btn-sm">
+                <i class="flaticon-381-exit-1"></i>
+                Thoát
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row w-100">
+            <div class="col-md-9">
+                <form>
+                    <div id="id" style="display:none;">@ViewBag.Id</div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tên Slider</label>
+                        <div class="form-group">
+                            <input id="name" type="text" class="form-control input-default " placeholder="Tên Slider">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả</label>
+                        <div class="form-group">
+                            <input id="description" type="text" class="form-control input-default " placeholder="Mô tả">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label class="mb-2 font-weight-bold" for="">Ảnh</label>
+                    <div class="">
+                        <input id="image" class="control-label" name="" type="file" value="">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="img">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Trạng thái hiển thị</label>
+                    <div class="form-group">
+                        <select id="active" class="form-control default-select">
+                            <option value="1">Hiển thị</option>
+                            <option value="0">Không hiển thị</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Vị trí hiển thị</label>
+                    <div class="form-group">
+                        <select id="position" class="form-control default-select">
+                            <option value="0">Trang chủ</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function (){
+            let Url = 'https://localhost:7008/api/Sliders/id?id=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    if (response.position == "Home") {
+                        position = 0;
+                    }
+                    $('#name').val(response.name);
+                    $('#position').val(position);
+                    $('#description').val(response.description);
+                    $('#active').val(response.isActive).change();
+                    $('.img').append(`<img src="/Pictures/Sliders/${response.image}" alt="" width="100%" class="d-block my-2">`);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        });
+
+        function editSlider() {
+            var fd = new FormData();
+            var file = $('#image').prop('files')[0];
+            fd.append("Name", $('#name').val());
+            fd.append("Description", $('#description').val());
+            fd.append("Position", $('#position').val() == null ? 0 : $('#position').val());
+            fd.append("IsActive", $('#active').val());
+            //fd.append("UpdatedBy", 4);
+            fd.append("UpdatedBy", $("#session").text());
+
+            fd.append("FileImage", file);
+            var Url = "https://localhost:7008/api/Sliders/id?id=" + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Cập nhật thành công thông tin Slider: " + $("#name").val() + "!", "/Admin/Slider/Index");
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Slider tên: " + $("#name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+
+    </script>
+}

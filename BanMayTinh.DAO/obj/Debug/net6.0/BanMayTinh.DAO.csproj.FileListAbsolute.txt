@@ -1,0 +1,17 @@
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.DAO.deps.json
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.DAO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.DAO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.csproj.AssemblyReference.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.GeneratedMSBuildEditorConfig.editorconfig
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.AssemblyInfoInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.AssemblyInfo.cs
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.csproj.CoreCompileInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\refint\BanMayTinh.DAO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\ref\BanMayTinh.DAO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.DTO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.DTO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\obj\Debug\net6.0\BanMayTinh.DAO.csproj.CopyComplete
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.UTILITIES.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DAO\bin\Debug\net6.0\BanMayTinh.UTILITIES.pdb

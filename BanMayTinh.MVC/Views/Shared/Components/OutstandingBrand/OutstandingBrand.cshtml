@@ -1,0 +1,25 @@
+﻿@model IList<BanMayTinh.DTO.TblBrand>
+
+<div class="mt-5 list-product">
+    <div class="title-product">
+        <h3>Thương hiệu nổi bật nổi bật</h3>
+        <div class="swiper mySwiper mt-4">
+            <div class="swiper-wrapper">
+                @foreach(var b in Model)
+                {
+                    <div class="swiper-slide">
+                        <a href=@Url.Action("ProductBrand", "Site", new {slug = b.Slug})>
+                            <img src="/Pictures/Brands/@b.Image" alt="" style=" width:200px; margin-top: 10px;">
+                        </a>
+                    </div>
+                }
+                
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+
+        </div>
+
+    </div>
+
+</div>

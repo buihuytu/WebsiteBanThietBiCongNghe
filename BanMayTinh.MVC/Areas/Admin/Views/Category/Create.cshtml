@@ -1,0 +1,153 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Thêm mới thể loại";
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="h5-title">Thêm mới thể loại</h5>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div class="button">
+            <button href="" class="btn btn-primary btn-sm" onclick="createCategory();">
+                <i class="flaticon-381-save"></i>
+                Lưu
+            </button>
+            <a href="/Admin/Category/Index" class="btn btn-danger btn-sm">
+                <i class="flaticon-381-exit-1"></i>
+                Thoát
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row w-100">
+            <div class="col-md-9">
+                <form>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tên thể loại</label>
+                        <div class="form-group">
+                            <input id="name" type="text" class="form-control input-default " placeholder="Tên thể loại">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Ghi chú</label>
+                        <div class="form-group">
+                            <input id="note" type="text" class="form-control input-default " placeholder="Ghi chú">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tiêu đề SEO</label>
+                        <div class="form-group">
+                            <input id="metaTitle" type="text" class="form-control input-default " placeholder="Tiêu đề SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Từ khóa SEO</label>
+                        <div class="form-group">
+                            <input id="metaKey" type="text" class="form-control input-default " placeholder="Từ khóa SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả SEO</label>
+                        <div class="form-group">
+                            <input id="metaDesc" type="text" class="form-control input-default " placeholder="Mô tả SEO">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Thể loại cha</label>
+                    <div id="cate" class="form-group">
+                        <select id="idParent" class="form-control default-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="mb-2 font-weight-bold" for="">Ảnh đại diện</label>
+                    <div class="">
+                        <input id="image" class="control-label" name="" type="file" value="">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Trạng thái hiển thị</label>
+                    <div class="form-group">
+                        <select id="active" class="form-control default-select">
+                            <option value="1">Hiển thị</option>
+                            <option value="0">Không hiển thị</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            LoadAllCategories();
+        });
+
+        function LoadAllCategories() {
+            let Url = "https://localhost:7008/api/Categories";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#cate .show li").each(function () {
+                        $(this).remove();
+                    });
+                    $("#idParent").append(`<option disabled selected hidden>Vui lòng chọn thể loại</option>`);
+                    for (let category of response) {
+                        $("#idParent").append(`<option value="${category.id}">${category.name}</option>`);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function createCategory() {
+            var fd = new FormData();
+            var file = $('#image').prop('files')[0];
+            fd.append("Name", $('#name').val());
+            fd.append("Notes", $('#note').val());
+            fd.append("IdParent", $('#idParent').val() == null ? 0 : $('#idParent').val());
+            fd.append("MetaTitle", $('#metaTitle').val());
+            fd.append("MetaKey", $('#metaKey').val());
+            fd.append("MetaDesc", $('#metaDesc').val());
+            fd.append("IsActive", $('#active').val());
+            //fd.append("CreatedBy", 4);
+            //fd.append("UpdatedBy", 4);
+            fd.append("CreatedBy", $("#session").text());
+            fd.append("UpdatedBy", $("#session").text());
+            fd.append("FileImage", file);
+            let Url = "https://localhost:7008/api/Categories";
+            $.ajax({
+                url: Url,
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Thêm thành công Thể loại: " + $("#name").val() + "!", "/Admin/Category/Index");
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Thể loại: " + $("#name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+    </script>
+}

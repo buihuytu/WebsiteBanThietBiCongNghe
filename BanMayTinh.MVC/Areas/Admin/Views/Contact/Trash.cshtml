@@ -1,0 +1,240 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Thùng rác";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">List Contacts</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="/Admin/Contact/Index" class="btn btn-primary btn-back btn-sm">Quay lại <i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblContacts" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th><strong>Tên</strong></th>
+                        <th><strong>Nội dung</strong></th>
+                        <th><strong>Email</strong></th>
+                        <th><strong>Số điện thoại</strong></th>
+                        <th><strong>Trạng thái</strong></th>
+                        <th><strong>Hành động</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalContact"></span> liên hệ
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetTrashContacts(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetTrashContacts(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetTrashContacts(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetTrashContacts(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetTrashContacts(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(contacts, totalContact) {
+            $("#tblContacts tbody").remove();
+            if ($("#tblContacts tbody").length == 0) {
+                $("#tblContacts").append("<tbody></tbody>");
+            }
+
+            if (totalContact != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + contacts.length}`);
+            $("#totalContact").text(totalContact);
+
+            let stt = 1;
+            for (let contact of contacts) {
+                let replyStatus = '';
+                if (contact.isReply == 1) {
+                    replyStatus = '<span class="badge light badge-success">Replied</span>';
+                }
+                else {
+                    replyStatus = '<span class="badge light badge-danger">Waiting</span>';
+                }
+
+                $("#tblContacts tbody").append(
+                    `<tr style="height: 80px">
+                        <td><strong>${stt}</strong></td>
+                        <td>${contact.id}</td>
+                        <td>${contact.fullName}</td>
+                        <td>${contact.enquiry}</td>
+                        <td>${contact.email}</td>
+                        <td>${contact.phone}</td>
+                        <td>${replyStatus}</td>
+                        <td>
+                            <div class="d-flex">
+                                <button class="btn btn-primary shadow btn-xs sharp mr-1" onClick="reTrash('${contact.id}');">
+                                    <i class="flaticon-066-refresh"></i>
+                                </button>
+                                <a href="/Admin/Contact/Delete/${contact.id}" class="btn btn-danger shadow btn-xs sharp">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetTrashContacts(number) {
+            let Url = "https://localhost:7008/api/Contacts/AllPage?page=" + number + "&take=" + take + "&isDelete=1";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countContacts);
+                    $("#totalPage").text(`${Math.ceil(response.countContacts / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/Contacts/GetByEmailPage?email=" + str + "&page=" + page + "&take=" + take + "&isDelete=1";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countContacts);
+                    $("#totalPage").text(`${Math.ceil(response.countContacts / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function reTrash(id) {
+            let URL = "https://localhost:7008/api/Contacts/ReTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Khôi phục thành công Liên hệ ID = " + id + " !");
+                    GetTrashContacts(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

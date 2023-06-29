@@ -1,0 +1,51 @@
+﻿input[type=checkbox], input[type=radio] {
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.checkout-cart .my-cart {
+    height: 40px;
+    font-size: 15px;
+    border: 1px solid rgba(224, 168, 0, 0.4);
+    background: #ffe;
+    opacity: 0.7;
+    line-height: 40px;
+}
+
+.checkout-cart .title {
+    height: 50px;
+    background: #fff;
+    font-size: 14px;
+    opacity: 0.8;
+    line-height: 50px;
+    border: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    -webkit-box-shadow: 2px 6px 5px 0px rgba(235, 228, 235, 1);
+    -moz-box-shadow: 2px 6px 5px 0px rgba(235, 228, 235, 1);
+    box-shadow: 2px 6px 5px 0px rgba(235, 228, 235, 1);
+}
+
+.checkout-cart .content {
+    height: 90px;
+    background: #fff;
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 90px;
+}
+
+.fb-totalp {
+    -webkit-box-shadow: 2px -2px 7px -1px rgba(199, 199, 199, 1);
+    -moz-box-shadow: 2px -2px 7px -1px rgba(199, 199, 199, 1);
+    box-shadow: 2px -2px 7px -1px rgba(199, 199, 199, 1);
+    line-height: 50px;
+    color: #333;
+}
+
+.fb-totalp .btn {
+    margin-left: 20px;
+    font-size: 14px;
+    height: 40px;
+    line-height: 24px;
+    width: 200px;
+    background: #ee4d2d;
+}

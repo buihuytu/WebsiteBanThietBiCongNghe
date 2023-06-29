@@ -1,0 +1,15 @@
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\bin\Debug\net6.0\BanMayTinh.UTILITIES.deps.json
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\bin\Debug\net6.0\BanMayTinh.UTILITIES.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\bin\Debug\net6.0\BanMayTinh.UTILITIES.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\bin\Debug\net6.0\BanMayTinh.DTO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\bin\Debug\net6.0\BanMayTinh.DTO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.csproj.AssemblyReference.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.GeneratedMSBuildEditorConfig.editorconfig
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.AssemblyInfoInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.AssemblyInfo.cs
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.csproj.CoreCompileInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.csproj.CopyComplete
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\refint\BanMayTinh.UTILITIES.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\BanMayTinh.UTILITIES.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.UTILITIES\obj\Debug\net6.0\ref\BanMayTinh.UTILITIES.dll

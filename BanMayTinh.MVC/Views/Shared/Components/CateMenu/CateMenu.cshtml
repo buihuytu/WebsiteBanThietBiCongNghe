@@ -1,0 +1,37 @@
+﻿@model IList<BanMayTinh.DTO.TblCategory>
+
+<div class="d-flex mx-auto" style="width: 87%;">
+
+    <div class="tab-menu" style="width: 30%; margin-right: 10px;">
+        <h4 class="menu-title"><i class="fas fa-bars" style="margin-right: 8px;"></i>Danh mục sản phẩm</h4>
+        <ul class="tab-menu-list style-scroll">
+            @foreach (var cate in Model)
+            {
+                if (cate.IdParent == 0)
+                {
+                    <li class="tab-menu-item" style="margin-right: 25px;">
+                        <a class="text-decoration-none" href=@Url.Action("ProductCategory", "Site", new {slugCate = @cate.Slug})>
+                            <img src="/Pictures/Categories/@cate.Icon" style="width: 30px; height: 20px;"> &nbsp; @cate.Name
+                        </a>
+                        <ul class="menu-child">
+                            @foreach (var c in Model)
+                            {
+                                if (cate.Id == c.IdParent)
+                                {
+                                    <li>
+                                        <a href="~/@c.Slug"> <img src="/Pictures/Categories/@c.Icon"> &nbsp; @c.Name</a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </li>
+                }
+            }
+            
+        </ul>
+
+
+    </div>
+    @(await Component.InvokeAsync("SlideShow"))
+
+</div>

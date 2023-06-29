@@ -1,0 +1,162 @@
+﻿@model BanMayTinh.DTO.TblProduct
+@{
+    ViewData["Title"] = "ProductDetail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<!-- this is body -->
+<div class="position-absolute mt-1" style="margin-left: 30px;">
+    <a href="../../index.html" class="nav-link font-weight-bold text-danger ml-lg-5 link-home" style="margin-top: -45px;">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width: 15px;margin-top: -6px;" viewBox="0 0 576 512">
+            <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"
+                  fill="#ff0000" />
+        </svg>
+        Trang chủ
+    </a>
+    <div class="link-listphone">
+        <a href="../listphone.html" class="nav-link text-danger">
+            <svg style="margin-top: -2px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-chevron-right" viewBox="0 0 16 16">
+
+                <path fill-rule="evenodd"
+                      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+            </svg>
+            <span style="font-size: 14px;font-weight: 500;">Điện thoại</span>
+        </a>
+    </div>
+
+    <div style="color: #ff0000;margin-top: -32px;margin-left: 270px;" class="detail">
+        <svg style="margin-top: -2px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+             class="bi bi-chevron-right" viewBox="0 0 16 16">
+
+            <path fill-rule="evenodd"
+                  d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+        </svg>
+        <span style="font-size: 14px;font-weight: 500;">Thông tin sản phẩm</span>
+    </div>
+</div>
+
+<!-- chi tiết sp -->
+<div class="container-fluid pt-3" style="width: 88%; border-top: solid 1px gray;margin-top: 100px;">
+</div>
+<div class="container mt-4 d-flex flex-wrap">
+    <div class="slideshow-container"  style="width: 600px">
+        @foreach (var i in ViewBag.ListPictures)
+        {
+            <div class="mySlides1">
+                <img src="/Pictures/Product-Images/@i.Name" style="min-width: 250px;width:100%;">
+            </div>
+        }
+        <a class="prev nav-link" onclick="plusSlides(-1, 0)">&#10094;</a>
+        <a class="next nav-link" onclick="plusSlides(1, 0)">&#10095;</a>
+    </div>
+    <div class="color-item mx-auto" style="text-align: center;">
+        <h5 style="font-weight: 600;"> @Model.Name</h5>
+        <div class="product-price">
+            <span class="pro-price">@String.Format("{0:0,0₫}", @Model.ProPrice)</span>
+            <del class="">@String.Format("{0:0,0₫}", @Model.Price)</del>
+            <span class="pro-percent">(-@String.Format("{0:0}", (Convert.ToDecimal((Model.Price - Model.ProPrice)) / Model.Price * 100))%)</span>
+        </div>
+        <div class="mt-4 voucher">
+            <p class="py-2" style="font-weight: bold;background-color: rgb(220, 208, 208); border-radius:10px 10px 0 0 ;">Quà tặng</p>
+            @if (Model.Gift != null)
+            {
+                foreach (var gift in Model.Gift.Split(new[] { '\n' }))
+                {
+                    <p class="text-voucher">🎁 @gift</p>
+                }
+            }
+        </div>
+
+        <div class="mt-4 voucher">
+            <p class="py-2" style="font-weight: bold;background-color: rgb(224, 45, 18); border-radius:10px 10px 0 0 ;">
+                Ưu đãi thêm
+            </p>
+            @if (Model.NewPromotion != null)
+            {
+                @foreach (var newPromotion in Model.NewPromotion.Split(new[] { '\n' }))
+                {
+                    <p class="text-voucher">⭐ @newPromotion</p>
+                }
+            }
+        </div>
+
+        <div class="order mt-4">
+            <div class="product-actions px-5">
+                <div class="action-buys">
+                    <button class="button btn-buynow" name="buy-now" id="buy-now" data-id="@Model.Id">
+                        <span class="maintext">MUA NGAY</span>
+                        <span class="subtext">Giao tận nơi hoặc nhận tại cửa hàng</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="mx-auto mt-5 py-3 detail-items px-3" style="width: 90%;">
+    <div class="row">
+        <div class="col-8">
+            <h3 style="text-align: center;color: red;">Thông tin sản phẩm</h3>
+            @Html.Raw(Model.Description)
+        </div>
+        <div class="col-4">
+            <h5 class="text-primary text-center">Thông số kỹ thuật</h5>
+            @Html.Raw(Model.Specification)
+        </div>
+
+    </div>
+</div>
+
+
+<!-- sp tương tự -->
+<div class="mt-5 list-product">
+    <div class="d-flex justify-content-between title-product" style="width: 95%;margin: auto;">
+        <h3>Sản Phẩm Tương Tự</h3>
+        <a href=@Url.Action("ProductCategory", "Site", new {slug = @ViewBag.CateSlug}) style="margin-top: -3px;">xem tất cả</a>
+    </div>
+</div>
+<div class="mx-auto mt-2 text-center list-products slick">
+    @foreach (var p in ViewBag.listOther)
+    {
+        <div class="list-product-items" style="height:390px;">
+            <div class="product-image">
+                <img src="/Pictures/Products/@p.Image" alt="ip" width="150" height="150" style="margin:auto;">
+            </div>
+            <div class="product-detail">
+                <h5 class="mt-2 title-product-item" style="width:200px">
+                    <a href=@Url.Action("ProductDetail", "Site", new { slug = @p.Slug}) class="list-product-items-link product-name">
+                        @p.Name
+                    </a>
+                </h5>
+                <del class="old-price">
+                    @String.Format("{0:0,0₫}", p.Price)
+                </del>
+                <p class="price-discount">
+                    @String.Format("{0:0,0₫}", p.ProPrice)
+                    <span class="discount"> (-@String.Format("{0:0}", (Convert.ToDecimal((p.Price - p.ProPrice)) / p.Price * 100))%)</span>
+                </p>
+            </div>
+        </div>
+    }
+    
+</div>
+
+<!-- đánh giá sp -->
+<div class="w-75 mx-auto mt-5" style="border: solid 1px #cac9c9;background-color: #f9fafb;border-radius: 10px;">
+    <h5 class="p-3" style="opacity: 0.9;">Phản Hồi</h5>
+    <form action="" class="px-3 text-center ">
+        <input class="input-cmt" type="text" placeholder="viết bình luận ...">
+        <button class="px-3 py-2 mt-2" style="border: none;background-color: #ff0000;color: #FFFFFF;font-weight: 400;border-radius: 10px;font-size: 18px;margin-left: 10px;" type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16" style="color: #FFFFFF;">
+                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z" />
+            </svg> Gửi
+        </button>
+    </form>
+    <div class="render-comment p-3">
+    </div>
+</div>
+
+<script src="/js/UI/details.js" type="text/javascript" async></script>

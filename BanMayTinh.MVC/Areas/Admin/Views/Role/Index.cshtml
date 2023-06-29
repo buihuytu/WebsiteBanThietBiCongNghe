@@ -1,0 +1,498 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Danh sách Vai trò";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Danh sách Vai trò</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="search" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <button href="" class="btn btn-primary btn-add btn-sm" data-toggle="modal" data-target="#modalCenter" onclick="createClick();">
+                Thêm <i class="flaticon-381-add-1" style="margin: 1px;"></i>
+            </button>
+            <a href="/Admin/Role/Trash" class="btn btn-danger btn-trash btn-sm">
+                <i class="fa fa-trash" style="margin: 1px;"></i>
+                <span id="trash">Thùng rác</span>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblRole" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>ID</strong></th>
+                        <th><strong>Tên</strong></th>
+                        <th><strong>Ngày chỉnh sửa</strong></th>
+                        <th><strong>Hành động</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalRoles"></span> vai trò
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail-->
+<div class="modal fade" id="basicModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Role Detail</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-responsive-md" style="min-width: 0rem !important;">
+
+                    <tbody id="detail">
+                        <tr>
+                            <td><strong>Name</strong></td>
+                            <td id="name"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Created Date</strong></td>
+                            <td id="createdDate"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Created By</strong></td>
+                            <td id="createdName"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Updated Date</strong></td>
+                            <td id="updatedDate"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Updated By</strong></td>
+                            <td id="updatedName"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Update-->
+<div class="modal fade" id="modalCenter">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="title-action" class="modal-title">Thêm mới Vai trò</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body" style="padding: 0px;">
+                        <div class="basic-form">
+                            <form>
+                                <div class="form-group row">
+                                    <label class="col-sm-3 col-form-label">Tên</label>
+                                    <div class="col-sm-9">
+                                        <input id="input-name" type="text" class="form-control" placeholder="Tên">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-3 col-form-label">Trạng thái hiển thị</label>
+                                    <div class="col-sm-9">
+                                        <select id="input-status" class="form-control default-select">
+                                            <option value="1">Hiển thị</option>
+                                            <option value="0">Không hiển thị</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="input-close" type="button" class="btn btn-danger light" data-dismiss="modal">Close</button>
+                <button id="input-action" type="button" class="btn btn-primary" onclick="actionClick();">
+                    <span id="action-name"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        let roleId;
+        $(document).ready(function () {
+            GetAllRoles(page);
+
+            $("input[type='search']").keyup(function () {
+                let strSearch = $("input[type='search']").val();
+                if (strSearch == "") {
+                    GetAllRoles(page);
+                }
+                else {
+                    search(strSearch);
+                }
+            })
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetAllRoles(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+                <li id="next" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-right"></i>
+                    </a>
+                </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetAllRoles(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetAllRoles(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(roles, totalRoles) {
+            $("#tblRole tbody").remove();
+            if ($("#tblRole tbody").length == 0) {
+                $("#tblRole").append("<tbody></tbody>");
+            }
+
+            if (totalRoles != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + roles.length}`);
+            $("#totalRoles").text(totalRoles);
+
+            let stt = 1;
+            for (let role of roles) {
+                let checkActive = '';
+                if (role.isActive == 1) {
+                    checkActive += '<input class="changeStatus" data-id="' + role.id + '" type="checkbox" onClick="status(\'' + role.id + '\');" checked>';
+                }
+                else {
+                    checkActive += '<input class="changeStatus" data-id="' + role.id + '" type="checkbox" onClick="status(\'' + role.id + '\');" >';
+                }
+
+                let updatedAt = '';
+                if (role.updatedDate != null) {
+                    let d = new Date(role.updatedDate.trim());
+                    updatedAt = d.toLocaleString("nl-BE");
+                }
+                $("#tblRole tbody").append(
+                    `<tr>
+                        <td><strong>${stt}</strong></td>
+                        <td>${role.id}</td>
+                        <td>
+                            <a href="/Admin/Role/Detail/${role.id}" data-toggle="modal" data-target="#basicModal" onclick="detailRole('${role.id}')">${role.name}</a>
+                        </td>
+                        <td>${updatedAt}</td>
+                        <td>
+                            <div class="d-flex">
+                                <label class="switch">
+                                    ${checkActive}
+                                    <span class="slider round"></span>
+                                </label>
+                                <button class="btn btn-primary shadow btn-xs sharp mr-1" data-toggle="modal" data-target="#modalCenter" onclick="editClick('${role.id}');">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger shadow btn-xs sharp" onClick="delTrash('${role.id}');">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetAllRoles(number) {
+            let Url = "https://localhost:7008/api/Roles/AllPage?page=" + number + "&take=" + take + "&isDelete=0";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#trash").text('Thùng rác (' + response.countTrash + ')');
+                    printTable(response.list, response.countRoles);
+                    $("#totalPage").text(`${Math.ceil(response.countRoles / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function search(str) {
+            page = 1;
+            let Url = "https://localhost:7008/api/Roles/GetByNamePage?name=" + str + "&page=" + page + "&take=" + take + "&isDelete=0";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countRoles);
+                    $("#totalPage").text(`${Math.ceil(response.countRoles / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function status(id) {
+            let URL = "https://localhost:7008/api/Roles/ChangeActive/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Thay đổi trạng thái thành công Vai trò ID = " + id + "!");
+                },
+                error: function (error) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function delTrash(id) {
+            let URL = "https://localhost:7008/api/Roles/DelTrash/" + id + "?updatedBy=" + updatedBy;
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Chuyển thành công Vai trò ID = " + id + " vào thùng rác!");
+                    GetAllRoles(page);
+                },
+                error: function (error) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function detailRole(id) {
+            let Url = 'https://localhost:7008/api/Roles/id?id=' + id;
+
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    let createdAt, updatedAt;
+                    if (response.createdDate != null) {
+                        dateCreated = new Date(response.createdDate.trim());
+                        createdAt = dateCreated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        createdAt = "";
+                    }
+                    if (response.updatedDate != null) {
+                        dateUpdated = new Date(response.updatedDate.trim());
+                        updatedAt = dateUpdated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        updatedAt = "";
+                    }
+
+                    console.log(response);
+                    $('#name').text(response.name);
+                    $('#createdDate').text(createdAt);
+                    $('#createdName').text(response.createdName);
+                    $('#updatedDate').text(updatedAt);
+                    $('#updatedName').text(response.updatedName);
+
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function createClick(){
+            $("#input-name").val("");
+            $("#action-name").text("Create")
+        }
+
+        function editClick(id){
+            $("#input-name").val("");
+            $("#action-name").text("Save change")
+            roleId = id;
+
+            $.ajax({
+                url: 'https://localhost:7008/api/Roles/id?id=' + id,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response)
+                    $('#input-name').val(response.name);
+                    $('#input-status').val(response.isActive).change();
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function actionClick() {
+            if ($('#action-name').text() == "Create") {
+                createRole();
+            }
+            else {
+                editRole();
+            }
+        }
+
+        function createRole(){
+            let role = {
+                "name": $("#input-name").val(),
+                "isActive": $("#input-status").val(),
+                "createdBy": updatedBy,
+                "updatedBy": updatedBy
+                //"createdBy": $("#session").text(),
+                //"updatedBy": $("#session").text()
+            }
+            let Url = "https://localhost:7008/api/Roles";
+            $.ajax({
+                url: Url,
+                method: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "text",
+                data: JSON.stringify(role),
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Thêm thành công Vai trò: " + $("#input-name").val() + "!");
+                    GetAllRoles(page);
+                    $("#input-close").click()
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Vai trò: " + $("#input-name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+
+        function editRole() {
+            let role = {
+                "id": roleId,
+                "name": $("#input-name").val(),
+                "isActive": $("#input-status").val(),
+                "updatedBy": updatedBy
+                //"updatedBy": $("#session").text()
+            }
+            let Url = 'https://localhost:7008/api/Roles/id?id=' + roleId;
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: "text",
+                data: JSON.stringify(role),
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Cập nhật thành công thông tin Vai trò: " + $("#input-name").val() + "!");
+                    GetAllRoles(page);
+                    $("#input-close").click()
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Vai trò: " + $("#input-name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+
+    </script>
+}

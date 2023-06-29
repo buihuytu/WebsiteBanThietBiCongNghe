@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Xóa Liên hệ";
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Xóa Liên hệ</h4>
+        <div>
+            <button type="button" class="btn btn-danger" onClick="deleteContact();" title="Xóa" data-placement="top">
+                Xóa <i class="fa fa-trash" style="margin: 3px;"></i>
+            </button>
+            <a href="/Admin/Contact/Trash" class="btn btn-primary btn-back">Quay lại thùng rác<i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-responsive-md">
+                <tbody id="detail">
+                    <tr>
+                        <th><strong>Tên</strong></th>
+                        <td id="fullName"></td>
+                        <td id="id" style="display: none">@ViewBag.Id</td>
+                    </tr>
+                    <tr>
+                        <th><strong>Email</strong></th>
+                        <td id="email"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Số điện thoại</strong></th>
+                        <td id="phone"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Nội dung liên hệ</strong></th>
+                        <td id="enquiry"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Phản hồi</strong></th>
+                        <td id="reply"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày hỏi</strong></th>
+                        <td id="createdDate"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người phản hồi</strong></th>
+                        <td id="repliedBy"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày phản hồi</strong></th>
+                        <td id="repliedDate"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        $(document).ready(function () {
+            let Url = 'https://localhost:7008/api/Contacts/id?id=' + $("#id").text();
+
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    let createdAt, replied;
+                    if (response.createdDate != null) {
+                        dateCreated = new Date(response.createdDate.trim());
+                        createdAt = dateCreated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        createdAt = "";
+                    }
+                    if (response.repliedDate != null) {
+                        dateUpdated = new Date(response.repliedDate.trim());
+                        repliedAt = dateUpdated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        repliedAt = "";
+                    }
+
+                    console.log(response);
+                    $('#fullName').text(response.fullName);
+                    $('#email').text(response.email);
+                    $('#phone').text(response.phone);
+                    $('#enquiry').text(response.enquiry);
+                    $('#reply').text(response.reply);
+                    $('#createdDate').text(createdAt);
+                    $('#repliedBy').text(response.repliedBy);
+                    $('#repliedDate').text(repliedAt);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        });
+
+        function deleteContact() {
+            let contactId = $("#id").text().trim()
+            let Url = 'https://localhost:7008/api/Contacts/id?id=' + contactId;
+            $.ajax({
+                url: Url,
+                method: 'DELETE',
+                contentType: 'text',
+                dataType: 'text',
+                success: function (response) {
+                    showToastSuccessTopRight("Xóa thành công Liên hệ ID = " + contactId + "!", "/Admin/Contact/Trash");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

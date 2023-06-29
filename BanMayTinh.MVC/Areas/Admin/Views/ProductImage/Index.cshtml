@@ -1,0 +1,305 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Danh sách ảnh sản phẩm";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Danh sách ảnh</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <div id="productId" style="display:none;">@ViewBag.Id</div>
+            <div class="input-group search-area right d-lg-inline-flex d-none">
+                <input type="text" class="form-control" placeholder="Find something here...">
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="javascript:void(0)">
+                            <i class="flaticon-381-search-2"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <a href="" class="btn btn-primary btn-add btn-sm" data-toggle="modal" data-target="#basicModal" onclick="addBtn();">
+                Thêm mới <i class="flaticon-381-add-1" style="margin: 1px;"></i>
+            </a>
+            <a href="/Admin/Product/Index" class="btn btn-danger btn-back btn-sm">Quay lại <i class="flaticon-381-exit-1" style="margin: 3px;"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tblProductImages" class="table table-responsive-md">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"><strong>#</strong></th>
+                        <th><strong>Id</strong></th>
+                        <th><strong>Tên ảnh</strong></th>
+                        <th><strong>Ảnh</strong></th>
+                        <th><strong>ACTION</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div>
+                <nav>
+                    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+                        Hiển thị từ <span id="start"></span> đến <span id="end"></span> trên <span id="totalImgProduct"></span> ảnh
+                    </div>
+                    <ul id="pagination" class="pagination pagination-circle" style="justify-content: end;">
+                    </ul>
+                </nav>
+            </div>
+            <div id="totalPage" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+<button id="btn-modal" type="button" class="btn btn-primary" data-toggle="modal" data-target="#basicModal" style="display: none;">Basic modal</button>
+<!-- Modal -->
+<div class="modal fade" id="basicModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Danh sách ảnh</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="mb-2 font-weight-bold" for="">Chọn ảnh</label>
+                    <div class="">
+                        <input class="control-label" id="listImage" name="" type="file" value="" multiple accept="image/*">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-close" type="button" class="btn btn-danger light" data-dismiss="modal">Đóng</button>
+                <button id="btn-save-image" type="button" class="btn btn-primary" onclick="activityClick();">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        let updatedBy = $("#session").text();
+        let page = 1;
+        let take = 10;
+        $(document).ready(function () {
+            GetAllProductImages(page);
+        });
+
+        function paging(page) {
+            $("#pagination li").remove();
+            let totalPage = $("#totalPage").text();
+            $("#pagination").append(`
+                <li id="previous" class="page-item page-indicator">
+                    <a class="page-link">
+                        <i class="la la-angle-left"></i>
+                    </a>
+                </li>`);
+            for (var i = 1; i <= parseInt(totalPage); i++) {
+                if (i == page) {
+                    $("#pagination").append(`
+                        <li class="page-item active" style="cursor:not-allowed;">
+                            <a class="page-link">${i}</a>
+                        </li>
+                    `);
+                }
+                else {
+                    $("#pagination").append(`
+                        <li class="page-item" style="cursor:pointer;">
+                            <a class="page-link" onclick="GetAllProductImages(${i})">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+            $("#pagination").append(`
+            <li id="next" class="page-item page-indicator">
+                <a class="page-link">
+                    <i class="la la-angle-right"></i>
+                </a>
+            </li>`);
+
+            $("#next").click(function () {
+                if (page < parseInt($("#totalPage").text())) {
+                    page++;
+                    GetAllProductImages(page);
+                }
+            })
+            $("#previous").click(function () {
+                if (page > 1) {
+                    page--;
+                    GetAllProductImages(page);
+                }
+            })
+            if (page == 1) {
+                $("#previous").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#previous").css('cursor', 'pointer')
+            }
+            if (page == parseInt($("#totalPage").text())) {
+                $("#next").css('cursor', 'not-allowed')
+            }
+            else {
+                $("#next").css('cursor', 'pointer')
+            }
+        }
+
+        function printTable(images, totalImgProduct) {
+            $("#tblProductImages tbody").remove();
+            if ($("#tblProductImages tbody").length == 0) {
+                $("#tblProductImages").append("<tbody></tbody>");
+            }
+
+            if (totalImgProduct != 0) {
+                $("#start").text(`${((page - 1) * take) + 1}`);
+            }
+            else {
+                $("#start").text(0);
+            }
+            $("#end").text(`${((page - 1) * take) + images.length}`);
+            $("#totalImgProduct").text(totalImgProduct);
+
+            let stt = 1;
+            for (let image of images) {
+                $("#tblProductImages tbody").append(
+                    `<tr style="height: 80px">
+                        <td><strong>${stt}</strong></td>
+                        <td><strong>${image.id}</strong></td>
+                        <td><strong>${image.name}</strong></td>
+                        <td><img src="/Pictures/Product-Images/${image.name}" alt="${image.name}" style="width: 120px; height: 70px;"></td>
+                        <td>
+                            <div class="d-flex">
+                                <label class="switch">
+                                    <input class="changeStatus" data-id="" type="checkbox" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <button class="btn btn-primary shadow btn-xs sharp mr-1" data-toggle="modal" data-target="#basicModal" onclick="editBtn('${image.id}');"><i class="fa fa-pencil"></i></button>
+                                <button class="btn btn-danger shadow btn-xs sharp" onClick="deleteImage('${image.id}');">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`
+                )
+                stt++;
+            }
+        }
+
+        function GetAllProductImages(number) {
+            let Url = "https://localhost:7008/api/ProductImages/GetImageProductPage?productId=" + $("#productId").text() + "&page=" + number + "&take=10";
+            page = number;
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    printTable(response.list, response.countImg);
+                    $("#totalPage").text(`${Math.ceil(response.countImg / take)}`);
+                    paging(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function editBtn(id) {
+            imageId = id;
+            $("#btn-save-image").text("Sửa");
+        }
+
+        function addBtn() {
+            $("#btn-save-image").text("Thêm mới");
+        }
+
+        function activityClick() {
+            if ($("#btn-save-image").text() == "Thêm mới") {
+                saveListImg();
+                //alert("Thêm mới");
+            }
+            else {
+                let productId = $("#productId").text();
+
+                editImgProduct(imageId);
+                //alert(`productId: ${productId} - imageId: ${imageId}`)
+            }
+        }
+
+        function saveListImg() {
+            var fd = new FormData();
+            var files = $('#listImage').prop('files');
+            fd.append("IdProduct", $("#productId").text());
+            for (let i = files.length - 1; i >= 0; i--) {
+                fd.append("FileImage", files[i]);
+            }
+            let Url = "https://localhost:7008/api/ProductImages/upload-many-images";
+            $.ajax({
+                url: Url,
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Thêm thành công danh sách ảnh cho sản phẩm ID = " + $("#productId").text() + "!");
+                    GetAllProductImages(page);
+                    $("#btn-close").click();
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function editImgProduct(imageId) {
+            var fd = new FormData();
+            var file = $('#listImage').prop('files')[0];
+            fd.append("IdProduct", $("#productId").text());
+            fd.append("FileImage", file);
+            let Url = "https://localhost:7008/api/ProductImages/id?ID=" + imageId;
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Thay đổi thành công ảnh ID = " + imageId + "!");
+                    GetAllProductImages(page);
+                    $("#btn-close").click();
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function deleteImage(imageId) {
+            let Url = 'https://localhost:7008/api/ProductImages/productId/imageId?productId=' + $("#productId").text() + '&imageId=' + imageId;
+            $.ajax({
+                url: Url,
+                method: 'DELETE',
+                contentType: 'text',
+                dataType: 'text',
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Xóa thành công ảnh ID = " + imageId + "!");
+                    GetAllProductImages(page);
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

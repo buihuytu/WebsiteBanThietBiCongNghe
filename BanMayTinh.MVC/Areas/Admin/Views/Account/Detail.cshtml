@@ -1,0 +1,147 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Chi tiết tài khoản";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Chi tiết tài khoản</h4>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div>
+            <a href="/Admin/Account/Edit/@ViewBag.Id" class="btn btn-primary btn-back btn-sm">Sửa <i class="fa fa-pencil" style="margin: 3px;"></i></a>
+            <button type="button" class="btn btn-danger btn-sm" data-placement="top" onClick="delTrash('@ViewBag.Id');">Xóa <i class="fa fa-trash" style="margin: 3px;"></i></button>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-responsive-md">
+                <tbody id="detail">
+                    <tr>
+                        <th><strong>Tên tài khoản</strong></th>
+                        <td id="username"></td>
+                        <td id="id" style="display: none;">@ViewBag.Id</td>
+                    </tr>
+                    <tr>
+                        <th><strong>Tên người dùng</strong></th>
+                        <td id="name"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ảnh tại diện</strong></th>
+                        <td id="avatar"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Trạng thái</strong></th>
+                        <td id="status"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Mật khẩu</strong></th>
+                        <td id="password"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Vai trò</strong></th>
+                        <td id="roleName"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Địa chỉ</strong></th>
+                        <td id="address"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Email</strong></th>
+                        <td id="email"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Số điện thoại</strong></th>
+                        <td id="phone"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày tạo</strong></th>
+                        <td id="createdAt"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người tạo</strong></th>
+                        <td id="createdBy"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Ngày sửa</strong></th>
+                        <td id="updatedAt"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Người sửa</strong></th>
+                        <td id="updatedBy"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let Url = 'https://localhost:7008/api/Accounts/id?id=' + $("#id").text();
+
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    let createdAt, updatedAt;
+                    if (response.createdDate != null) {
+                        dateCreated = new Date(response.createdDate.trim());
+                        createdAt = dateCreated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        createdAt = "";
+                    }
+                    if (response.updatedDate != null) {
+                        dateUpdated = new Date(response.updatedDate.trim());
+                        updatedAt = dateUpdated.toLocaleString("nl-BE");
+                    }
+                    else {
+                        updatedAt = "";
+                    }
+                    let activeStatus = (response.isActive == 1 ? "Họat đông" : "Không họat đông");
+                    $('#status').append(`<span class="badge badge-pill badge-info" style="margin-right: 2px">${activeStatus}</span>`);
+
+                    console.log(response);
+                    $('#name').text(response.name);
+                    $('#avatar').append(`<img src="/Pictures/Avatar/${response.avatar}" alt="avatar-${response.username}" style="width: 140px; height: 140px;">`);
+                    $('#username').text(response.username);
+                    $('#password').text(response.password);
+                    $('#roleName').text(response.roleName);
+                    $('#address').text(response.address);
+                    $('#email').text(response.email);
+                    $('#phone').text(response.phone);
+                    $('#createdAt').text(createdAt);
+                    $('#createdBy').text(response.createdName);
+                    $('#updatedAt').text(updatedAt);
+                    $('#updatedBy').text(response.updatedName);
+
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        })
+
+        function delTrash(id) {
+            let URL = "https://localhost:7008/api/Accounts/DelTrash/" + id + "?updatedBy=" + $("#session").text();
+            $.ajax({
+                url: URL,
+                method: 'PUT',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'text',
+                success: function (response) {
+                    showToastWarningTopRight("Chuyển thành công Tài khoản ID = " + id + " vào thùng rác!", "/Admin/Account/Index");
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+}

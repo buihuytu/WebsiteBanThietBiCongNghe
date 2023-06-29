@@ -1,0 +1,54 @@
+﻿/*// Phân trang*/
+.my-pagination {
+    outline: none;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.my-pagination ul {
+    margin-bottom: 20px;
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.75rem;
+    padding: 0;
+    margin: 0;
+}
+
+.my-pagination ul li.active {
+    background-color: #ff042e;
+    font-size: 1rem;
+    color: #fff;
+    box-shadow: 0 10px 20px 0px #adabaa;
+    padding: 0.55rem 1rem;
+    border: 1px solid #ff042e;
+    transition: all 0.5s;
+    border-radius: 0.35rem !important;
+}
+
+.my-pagination ul li {
+    margin-right: 7px;
+    list-style: none;
+}
+
+
+.my-pagination ul li a {
+    margin: 0;
+    text-align: center;
+    padding: 0.55rem 1rem;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: #000;
+    text-decoration: none;
+    position: relative;
+    display: block;
+    margin-left: -1px;
+    border: 1px solid #EEEEEE;
+    border-radius: 0.35rem !important;
+}
+
+.my-pagination ul li a:hover {
+    background-color: #ff042e;
+    border-color: #ff042e;
+    color: #fff;
+}

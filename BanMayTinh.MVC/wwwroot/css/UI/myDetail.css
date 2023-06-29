@@ -1,0 +1,114 @@
+﻿* {
+    box-sizing: border-box
+}
+
+.mySlides1, .mySlides2 {
+    display: none
+}
+
+
+.slideshow-container {
+    max-width: 1000px;
+    position: relative;
+    margin: auto;
+    padding: 0 50px;
+    border: solid 1px gray;
+    border-radius: 10px;
+}
+
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 30px 30px 0;
+    user-select: none;
+    margin-left: -50px;
+}
+
+.next {
+    right: 0;
+    border-radius: 30px 0 0 30px;
+}
+
+    .prev:hover, .next:hover {
+        color: red;
+        background-color: #c2bdbd;
+    }
+
+.btn-color-item {
+    border: solid 1px gray;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    opacity: 0.9;
+    border-radius: 10px;
+}
+
+.active {
+    background-color: #ef3535;
+    color: #FFFFFF;
+}
+
+.voucher {
+    border: solid 1px darkgray;
+    border-radius: 12px;
+}
+
+.text-voucher {
+    margin-left: 10px;
+    font-size: 12px;
+    text-align: start;
+    font-weight: 500;
+}
+
+.detail-items {
+    font-size: 14px;
+    font-weight: 500;
+    border: solid 1px darkgray;
+    border-radius: 10px;
+}
+
+table {
+    border-radius: 50px;
+    border-collapse: collapse;
+    width: 100%;
+    border: solid 1px #f2f2f2;
+}
+
+td {
+    text-align: left;
+    padding: 5px;
+}
+
+tr:nth-child(odd) {
+    background-color: #f2f2f2
+}
+
+.input-cmt {
+    border: none;
+    box-shadow: 0px 0px 4px 2px #d3d3d3;
+    border-radius: 10px;
+    height: 40px;
+    outline: 0;
+    padding-left: 20px;
+    max-width: 500px;
+    margin-right: 10px;
+    width: 100%
+}
+
+.link-listphone {
+    color: #ff0000;
+    margin-top: -40px;
+    margin-left: 157px;
+}
+
+.col-4 table {
+    min-width: 400px !important;
+}

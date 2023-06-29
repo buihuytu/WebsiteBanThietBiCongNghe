@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json;
+@inject IHttpContextAccessor Accessor
+@using BanMayTinh.UTILITIES.Library
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Accessor.HttpContext.Session.GetString("Cart") == null)
+{
+    <div class="container cart-items pb-4 w-50 mx-auto" style="min-width: 375px;margin-top: 80px;border-radius: 10px;text-align: center;background-color: #fef2f2;">
+        <div class="home" style="text-align: start;margin-top: 90px; ">
+            <a href=@Url.Action("Home", "Site") style="text-decoration: none;font-weight: 500;color: #ff0000;">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     style="width: 15px;margin-top: -5px;"
+                     viewBox="0 0 576 512">
+                    <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" fill="#ff0000" />
+                </svg>
+                <span class="mt-5">Trang chủ</span>
+            </a>
+        </div>
+        <h4 style="color: red;opacity: 0.8;font-weight: 500;">Giỏ hàng</h4>
+        <div class="item-cart">
+            <div class="my-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-emoji-frown" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                    <path d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" />
+                </svg>
+                <h5 class="mt-3">Bạn chưa có sản phẩm nào trong giỏ hàng !</h5>
+            </div>
+            <div>
+            </div>
+        </div>
+        <div class="total d-flex justify-content-around">
+            <div>
+                <a href=@Url.Action("Home", "Site") class="btn-cart" style="text-decoration: none; background-color: #cf2d2d;color: #FFFFFF; padding:10px 30px;border-radius: 20px;font-weight: 500;">Trở về</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="bg-light py-3" style="min-height: 535px;" id="checkout">
+        <div class="container checkout-cart">
+        <div class="row">
+            <div class="col-12 my-cart pl-5"><i class="fas fa-carrot text-success pr-2"></i> Giỏ hàng của bạn</div>
+        </div>
+        <div class="row title mt-3 mb-2">
+            <div class="col-5 pl-5">
+                <input class="form-check-input" type="checkbox" style="position: relative;">
+                &nbsp;&nbsp; &nbsp;Sản phẩm
+            </div>
+            <div class="col-2 text-center">Đơn giá</div>
+            <div class="col-2 text-center">Số lượng</div>
+            <div class="col-2 text-center">Thành tiền</div>
+            <div class="col-1 text-center">Thao tác</div>
+        </div>
+            @{
+                double sum = 0; int count = 0;
+            }
+            @foreach (var c in JsonConvert.DeserializeObject<List<ModelCart>>(Accessor.HttpContext.Session.GetString("Cart")))
+            {
+                count++;
+                sum += (c.Price * c.Quantity);
+                <div class="row content border-right border-bottom border-left">
+                <div class="col-5 pl-5">
+                    <input class="form-check-input" type="checkbox" style="position: relative;">&nbsp;&nbsp; &nbsp;
+                    <a href=@Url.Action("ProductDetail", "Site", new {slug = @c.Slug}) class="text-decoration-none text-dark">
+                    <img src="/Pictures/Products/@c.Image" alt="@c.Name" width="70">
+                        &nbsp; &nbsp; @c.Name
+                    </a>
+                </div>
+                    <div class="col-2 text-center"> @c.Price.ToString("N0")₫</div>
+                <div class="col-2 text-center">
+                    <div class="btn rounded-0 dout update" data-id="@c.ProductID" data-options="minus">-</div>
+
+                    <input type="number" class="rounded-0 border etd pl-3 bg-white" style="width:50px; height:34px;margin:-5px;outline:0;border: 0;text-align:center" value="@c.Quantity" min="1" data-id="1">
+
+                    <div class="btn rounded-0 douc update" data-id="@c.ProductID" data-options="add">+</div>
+                </div>
+
+                <div class="col-2 text-center" style="color:#ee4d2d">
+                    @((c.Price * c.Quantity).ToString("N0"))₫
+                </div>
+                <div class="col-1 text-center">
+                    <a href="#" class="b-remove-one text-decoration-none update" data-id="@c.ProductID" data-options="remove">Xóa</a>
+                </div>
+            </div>
+                
+            }
+            <div class="my-2">
+                <a href="/cart/removeall" class="text-end d-block text-decoration-none" style="font-size:15px; ">Xóa tất cả</a>
+            </div>
+            <div class="row fb-totalp bg-white container m-auto border fixed-bottom py-3">
+                <div class="col-3 pl-5">
+                    <input class="form-check-input" type="checkbox" style="position: relative;">
+                    &nbsp;&nbsp; &nbsp;Chọn tất cả (@count)
+                </div>
+
+                <div class="col-6 text-center">
+                    <div class="float-right">
+                        Tổng tiền hàng (@count sản phẩm): &nbsp;<strong class="d-inline" style="color:#ee4d2d;font-size: 27px;">@sum.ToString("N0")₫</strong>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="btn text-center rounded-0 text-light">
+                        <a href="#" class="checkAuth text-white text-decoration-none"> Thanh toán</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

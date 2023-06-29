@@ -1,0 +1,184 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Sửa danh mục bài viết";
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="h5-title">Sửa thông tin thể loại tin tức</h5>
+        <span style="display:none" id="session">@Accessor.HttpContext.Session.GetString("Admin_ID")</span>
+        <div class="button">
+            <button href="" class="btn btn-primary btn-sm" onclick="editNewsCategory();">
+                <i class="flaticon-381-save"></i>
+                Lưu
+            </button>
+            <a href="/Admin/NewsCategory/Index" class="btn btn-danger btn-sm">
+                <i class="flaticon-381-exit-1"></i>
+                Thoát
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row w-100">
+            <div class="col-md-9">
+                <form>
+                    <div id="id" style="display:none;">@ViewBag.Id</div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tên nhãn hiệu</label>
+                        <div class="form-group">
+                            <input id="name" type="text" class="form-control input-default " placeholder="Tên nhãn hiệu">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Ghi chú</label>
+                        <div class="form-group">
+                            <input id="note" type="text" class="form-control input-default " placeholder="Ghi chú">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Tiêu đề SEO</label>
+                        <div class="form-group">
+                            <input id="metaTitle" type="text" class="form-control input-default " placeholder="Tiêu đề SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Từ khóa SEO</label>
+                        <div class="form-group">
+                            <input id="metaKey" type="text" class="form-control input-default " placeholder="Từ khóa SEO">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="mb-2 font-weight-bold">Mô tả SEO</label>
+                        <div class="form-group">
+                            <input id="metaDesc" type="text" class="form-control input-default " placeholder="Mô tả SEO">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Thể loại cha</label>
+                    <div id="cate" class="form-group">
+                        <select id="idParent" class="form-control default-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="mb-2 font-weight-bold" for="">Ảnh đại diện</label>
+                    <div class="">
+                        <input id="image" class="control-label" name="" type="file" value="">
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Image" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="img">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="mb-2 font-weight-bold">Trạng thái hiển thị</label>
+                    <div class="form-group">
+                        <select id="active" class="form-control default-select">
+                            <option value="1">Hiển thị</option>
+                            <option value="0">Không hiển thị</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let Url = "https://localhost:7008/api/NewsCategories";
+            $.ajax({
+                url: Url,
+                method: "GET",
+                contentType: 'application/json;charset=utf-8',
+                success: function (response) {
+                    console.log(response);
+                    $("#cate .show li").each(function () {
+                        $(this).remove();
+                    });
+                    $("#idParent").append(`<option disabled selected hidden>Vui lòng chọn thể loại</option>`);
+                    for (let category of response.list) {
+                        $("#idParent").append(`<option id="cate-${category.id}" value="${category.id}">${category.name}</option>`);
+                    }
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+            LoadCategoryInfo();
+        });
+
+        function LoadCategoryInfo() {
+            let Url = 'https://localhost:7008/api/NewsCategories/id?id=' + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    $("#cate button").click(function () {
+                        let listItems = $("#cate .show li");
+                        for (let li of listItems) {
+                            if ($(li).text() == response.name) {
+                                ($(li).remove());
+                            }
+                        }
+                    })
+
+                    $('#name').val(response.name);
+                    $('#note').val(response.notes);
+                    $('#metaTitle').val(response.metaTitle);
+                    $('#metaKey').val(response.metaKey);
+                    $('#metaDesc').val(response.metaDesc);
+                    $('#idParent').val(response.parentId).change();
+                    $('.img').append(`<img src="/Pictures/NewsCategories/${response.icon}" alt="" width="100%" class="d-block my-2">`);
+                    $('#active').val(response.isActive).change();
+                },
+                error: function (errorMessage) {
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+        function editNewsCategory() {
+            let fd = new FormData();
+            let file = $('#image').prop('files')[0];
+            fd.append("Name", $('#name').val());
+            fd.append("Notes", $('#note').val());
+            fd.append("IdParent", $('#idParent').val() == null ? 0 : $('#idParent').val());
+            fd.append("MetaTitle", $('#metaTitle').val());
+            fd.append("MetaKey", $('#metaKey').val());
+            fd.append("MetaDesc", $('#metaDesc').val());
+            fd.append("IsActive", $('#active').val());
+            //fd.append("UpdatedBy", 4);
+            fd.append("UpdatedBy", $("#session").text());
+            fd.append("FileImage", file);
+            let Url = "https://localhost:7008/api/NewsCategories/id?id=" + $("#id").text();
+            $.ajax({
+                url: Url,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    showToastSuccessTopRight("Cập nhật thành công thông tin Danh mục bài viết " + $("#name").val() + "!", "/Admin/NewsCategory/Index");
+                },
+                error: function (errorMessage) {
+                    if (errorMessage.responseText == "e002") {
+                        showToastErrorTopRight("Danh mục Bài viết: " + $("#name").val() + " đã tồn tại!");
+                    }
+                    else if (errorMessage.responseText == "e001") {
+                        showToastErrorTopRight("Có lỗi khi thêm mới! Vui lòng liên hệ DEV để được hỗ trợ!");
+                    }
+                }
+            });
+        }
+    </script>
+}

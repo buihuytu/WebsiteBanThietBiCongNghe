@@ -1,0 +1,14 @@
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\bin\Debug\net6.0\BanMayTinh.DTO.deps.json
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\bin\Debug\net6.0\BanMayTinh.DTO.runtimeconfig.json
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\bin\Debug\net6.0\BanMayTinh.DTO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\bin\Debug\net6.0\BanMayTinh.DTO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.csproj.AssemblyReference.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.GeneratedMSBuildEditorConfig.editorconfig
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.AssemblyInfoInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.AssemblyInfo.cs
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.csproj.CoreCompileInputs.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\refint\BanMayTinh.DTO.dll
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.pdb
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\BanMayTinh.DTO.genruntimeconfig.cache
+D:\MyProject\WebBanMayTinh\BanMayTinh.DTO\obj\Debug\net6.0\ref\BanMayTinh.DTO.dll
